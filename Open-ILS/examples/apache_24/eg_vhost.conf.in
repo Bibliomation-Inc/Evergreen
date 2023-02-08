@@ -12,6 +12,8 @@ RewriteRule ^/$ %{REQUEST_SCHEME}://%{HTTP_HOST}/eg/opac/home [R=301,L]
 # Redirect staff to the correct URL if they forget to include the final /
 # ----------------------------------------------------------------------------------
 RewriteRule ^/eg/staff$ https://%{HTTP_HOST}/eg/staff/ [R=301,L]
+RewriteRule ^/eg/ffstaff$ https://%{HTTP_HOST}/eg/ffstaff/fulfillment [R=301,L]
+RewriteRule ^/eg/ffstaff/$ https://%{HTTP_HOST}/eg/ffstaff/fulfillment [R=301,L]
 
 # ----------------------------------------------------------------------------------
 # Staff must go to then eg2 (angular, not angularjs) login page
@@ -711,8 +713,9 @@ RewriteRule ^/openurl$ ${openurl:%1} [NE,PT]
     
     # Templates will be loaded from the following paths in reverse order.
     PerlAddVar OILSWebTemplatePath "@localstatedir@/templates"
-    PerlAddVar OILSWebTemplatePath "@localstatedir@/templates-bootstrap" # Comment this line out to use the legacy TPAC
-    #PerlAddVar OILSWebTemplatePath "@localstatedir@/templates_localskin"
+    #PerlAddVar OILSWebTemplatePath "@localstatedir@/templates-bootstrap" # Comment this line out to use the legacy TPAC
+    PerlAddVar OILSWebTemplatePath "@localstatedir@/templates_equinox"
+    #PerlAddVar OILSWebTemplatePath "@localstatedir@/templates_staff_only"
 
     #-------------------------------------------------
     # Added Content Configuration
@@ -861,6 +864,36 @@ RewriteRule ^/openurl$ ${openurl:%1} [NE,PT]
     #PerlAddVar OILSWebLocale "fr_ca"
     #PerlAddVar OILSWebLocale "@localstatedir@/data/locale/staff/fr-CA.po"
 </LocationMatch>
+
+<LocationMatch /eg/ffstaff/>
+    Options -MultiViews
+    PerlSetVar OILSWebStopAtIndex "true"
+
+    # sample staff-specific translation files
+    #PerlAddVar OILSWebLocale "en_ca"                                           
+    #PerlAddVar OILSWebLocale "/openils/var/data/locale/staff/en-CA.po"         
+    #PerlAddVar OILSWebLocale "fr_ca"                                           
+    #PerlAddVar OILSWebLocale "/openils/var/data/locale/staff/fr-CA.po"   
+</LocationMatch>
+
+<Location /eg/ffstaff/fulfillment>
+    Options -MultiViews
+    # any reuest that does not map to a template file
+    # is redirected to the index.  This allows us to
+    # map multiple routes to the same application.
+    RewriteEngine On
+    RewriteCond %{PATH_INFO} !/ffstaff/fulfillment/index
+    RewriteCond %{PATH_INFO} !/ffstaff/fulfillment/t_*
+    RewriteRule .* /eg/ffstaff/fulfillment/index [L,DPI]
+</Location>
+
+<Location /ff/fast_import>
+    SetHandler perl-script
+    PerlResponseHandler FulfILLment::WWW::FastImport
+    Options +ExecCGI
+    PerlSendHeader On
+    allow from all
+</Location>
 
 <Location /js/>
     <IfModule mod_headers.c>

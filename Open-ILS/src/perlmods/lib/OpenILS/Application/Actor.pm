@@ -75,6 +75,360 @@ my $set_ou_settings;
 #}
 
 __PACKAGE__->register_method(
+    method => 'fetch_web_action_print_template',
+    api_name    => 'open-ils.actor.web_action_print_template.fetch',
+    signature => q/
+        Given a blob of ILL action status information, generate some useful HTML for printing, based on the acting org unit and action.
+        @param authtoken Login session key
+        @pararm blob Action status blob
+    /
+);
+sub fetch_web_action_print_template {
+    my( $self, $client, $owner, $focus, $action, $direction ) = @_;
+    my $e = new_editor();
+    my $orgs = $U->get_org_ancestors($owner);
+
+    return $e->search_actor_web_action_print_template([
+        { owner     => $orgs,
+          focus     => $focus,
+          -or => [{action => $action},{action => undef}],
+          -or => [{direction => $direction},{direction => undef}]
+        },
+        { order_by => [
+            { class     => 'awapt',
+              field     => 'action',
+              compare   => { '=' => undef }
+            },
+            { class     => 'awapt',
+              field     => 'direction',
+              compare   => { '=' => undef }
+            }
+        ]}
+    ])->[0];
+}
+
+sub find_user_lib {
+    my $lib = shift;
+    my $e = new_editor();
+
+    $lib = $e->retrieve_actor_org_unit($lib) if (!ref($lib));
+
+    while ($lib) {
+        my $type = $e->retrieve_actor_org_unit_type($lib->ou_type);
+        return $lib if ($U->is_true($type->can_have_users));
+        return undef unless ($lib->parent_ou);
+        $lib = $e->retrieve_actor_org_unit($lib->parent_ou);
+    }
+
+    return undef;
+}
+
+__PACKAGE__->register_method(
+	method	=> "remote_auth_init",
+	api_name	=> "open-ils.actor.remote.authenticate.init",
+);
+sub remote_auth_init {
+    my($self, $client, $uname, $uhome) = @_;
+
+    $uhome = find_user_lib($uhome);
+    return 0 if (!$uhome);
+
+    $uhome = $uhome->id;
+
+    my $e = new_editor();
+    my $user = $e->search_actor_user({
+        usrname => "$uname:$uhome", 
+        home_ou => $uhome,
+        # deleted accounts must be re-fetched, updated, and
+        # un-deleted in open-ils.actor.remote.authenticate.complete
+        deleted => 'f'
+    });
+
+    return -1 unless @$user; # No local user matching the requested criteria, yet
+    return $U->simplereq( "open-ils.auth", "open-ils.auth.authenticate.init", "$uname:$uhome" );
+}
+
+__PACKAGE__->register_method(
+	method	=> "remote_auth_complete",
+	api_name	=> "open-ils.actor.remote.authenticate.complete",
+);
+sub remote_auth_complete {
+    my($self, $client, $args) = @_;
+
+    my $uhome = find_user_lib($$args{home});
+    return $U->DB_UPDATE_FAILED() if (!$uhome);
+
+    $$args{home} = $uhome->id;
+
+    my $ugroup = $U->ou_ancestor_setting_value(
+        $$args{home}, 'ff.remote.user_cache.default_group'
+    ) || 1;
+
+    my $e = new_editor(xact => 1, authtoken => $$args{authtoken});
+    my $user = $e->search_actor_user({
+        usrname => "$$args{username}:$$args{home}", 
+        home_ou => $$args{home}
+    })->[0];
+
+    my $remote_user;
+    if ($U->is_true($U->ou_ancestor_setting_value($$args{home}, 'ff.remote.connector.disabled'))) {
+        # non-connector dummy patron, barcode only
+        $remote_user = {
+            given_name => 'Placeholder',
+            surname => 'Proxy',
+        };
+        $$args{password} = md5_hex(int(rand(time))); # random password, just so there's something
+    } else {
+        $remote_user = $U->simplereq( 
+            "fulfillment.laicore", 
+            "fulfillment.laicore.lookup_user", 
+            $$args{home}, $$args{username}, $$args{password} 
+        );
+    }
+
+    $remote_user = OpenSRF::Utils::JSON->JSON2perl($remote_user) 
+        if (!ref($remote_user)); # XXX arg.... (what's this now?)
+
+    if ($remote_user && !$$remote_user{error}) { # create or update a user ...
+        $$args{barcode} = $$remote_user{user_barcode};
+        if (!$user) {
+            my $evt = create_proxy_user($remote_user, $ugroup, $args, $e);
+            return $evt if $evt;
+        } else {
+            my $evt = resurrect_user($user, $remote_user, $ugroup, $args);
+            return $evt if $evt;
+        }
+    }
+
+    $$args{username} = "$$args{username}:$$args{home}";
+
+    # initial call to .init exited early w/ no seed,
+    # so we need to create one now that we have a user
+    my $seed = $U->simplereq( 
+        "open-ils.auth", 
+        "open-ils.auth.authenticate.init", 
+        $$args{username}
+    );
+
+    $$args{password} = md5_hex($seed . md5_hex($$args{password}));
+
+    return $U->simplereq( "open-ils.auth", "open-ils.auth.authenticate.complete", $args );
+}
+
+__PACKAGE__->register_method(
+	method	=> "create_proxy_user_api",
+	api_name	=> "open-ils.actor.remote.proxy_user.find_or_create",
+);
+sub create_proxy_user_api {
+    my $self = shift;
+    my $conn = shift;
+    my $auth = shift;
+    my $barcode = shift;
+    my $home = shift;
+
+    my $e = new_editor(xact => 1, authtoken => $auth);
+    unless ($e->checkauth and $e->allowed('STAFF_LOGIN')) {
+        return $e->die_event;
+    }
+
+    $home ||= $e->requestor->ws_ou;
+
+    return undef unless $home;
+
+    my $card = $e->search_actor_card({
+        barcode => $barcode,
+        org => $home
+    })->[0];
+
+    my $user;
+    if ($card) {
+        $user = $e->retrieve_actor_user($card->usr);
+        return $user if $user;
+    }
+
+    my $ugroup = $U->ou_ancestor_setting_value(
+        $home, 'ff.remote.user_cache.default_group'
+    ) || 1;
+
+    my $remote_user;
+    if ($U->is_true($U->ou_ancestor_setting_value($home, 'ff.remote.connector.disabled'))) {
+        # non-connector dummy patron, barcode only
+        $remote_user = {
+            user_barcode => $barcode,
+            given_name => 'Placeholder',
+            surname => 'Proxy',
+        };
+    } else {
+        $remote_user = $U->simplereq( 
+            "fulfillment.laicore", 
+            "fulfillment.laicore.lookup_user", 
+            $home, $barcode 
+        );
+    }
+
+    my $args = {
+        password => md5_hex(int(rand(time))), # random password, just so there's something
+        username => $barcode,
+        home => $home
+    };
+
+    if ($remote_user && !$$remote_user{error}) { # create or update a user ...
+        my $evt = create_proxy_user($remote_user, $ugroup, $args, $e);
+        return $evt if $evt;
+    } else {
+        return $remote_user;
+    }
+
+    $user = $e->search_actor_user({
+        usrname => "$barcode:$home", 
+        home_ou => $home
+    })->[0];
+    return $user;
+
+}
+
+sub create_proxy_user {
+    my $u = shift; # remote user hash from connnector
+    my $ugroup = shift;
+    my $args = shift; 
+    my $e = shift || new_editor(xact => 1);
+
+    $logger->info("FF creating new user for $$args{username}");
+
+    for my $k (keys %$u) {
+        delete $$u{$k} if ref($$u{$k});
+    }
+
+    my $evt;
+    my $patron = Fieldmapper::actor::user->new();
+    my $card = Fieldmapper::actor::card->new();
+
+    # how we find them locally
+    $patron->usrname( "$$args{username}:$$args{home}" );
+    $patron->passwd( $$args{password} );
+    $patron->profile( $ugroup );
+    $patron->home_ou( $$args{home} );
+    $patron->ident_type(3);
+
+    # what we can glean from the remote system
+    $patron->first_given_name( $$u{given_name} || '...' );
+    $patron->family_name( $$u{surname} || '...' );
+    $patron->suffix( $$u{suffix} );
+    $patron->prefix( $$u{prefix} );
+    $patron->alias( $$u{initials} );
+    $patron->email( $$u{email} );
+    
+    # Set up all of the virtual IDs, isnew, etc.
+    $patron->isnew(1);
+    $patron->card(-1);
+    
+    $card->isnew(1);
+    $card->id(-1);
+    $card->usr(-1);
+    $card->org($$args{home});
+    $card->barcode($$u{user_barcode} || $$u{user_id} || $$args{username});
+
+    $patron->cards([$card]);
+
+    $logger->info("Creating new remote-proxy patron...");
+
+    # $new_patron is the patron in progress.  $patron is the original patron
+    # passed in with the method.  new_patron will change as the components
+    # of patron are added/updated.
+
+    # do a dance to get the password hashed securely
+    my $saved_password = $patron->passwd;
+    $patron->passwd('');
+    my $new_patron = $e->create_actor_user($patron) or return $e->die_event;
+    modify_migrated_user_password($e, $new_patron->id, $saved_password) if $saved_password;
+
+    my $id = $new_patron->id; # added by CStoreEditor
+
+    $logger->info("Successfully created new user [$id] in DB");
+    $new_patron = $e->retrieve_actor_user($id);
+
+    # unflesh the real items on the patron
+    $patron->card( $patron->card->id ) if(ref($patron->card));
+
+    ( $new_patron, $evt ) = _add_update_cards($e, $patron, $new_patron, 1);
+    return $evt if $evt;
+
+    # re-update the patron
+    $e->update_actor_user($new_patron) or return $e->die_event;
+
+    $e->commit();
+    return;
+}
+
+
+# the steps involved in user resurrection are just different 
+# enough from user creation that blending them into one chain
+# of code gets messy.  There may some room for combining
+# and refactoring here, since there is some duplication.
+sub resurrect_user {
+    my $user = shift;
+    my $remote_user = shift;
+    my $ugroup = shift;
+    my $args = shift;
+
+    $logger->info("Updating a remote user ".$user->id);
+
+    my $e = new_editor(xact => 1);
+
+    my $card = $e->search_actor_card({usr => $user->id})->[0];
+
+    if (!$card) {
+        $card = Fieldmapper::actor::card->new();
+        $card->usr($user->id);
+        $card->isnew(1); # for our own tracking
+        $user->clear_card;
+    }
+
+    $user->deleted('f');
+    $user->usrname("$$args{username}:$$args{home}");
+    $user->passwd($$args{password});
+    $user->profile($ugroup);
+    $user->home_ou($$args{home});
+    $user->ident_type(3);
+
+    # what we can glean from the remote system
+    my $u = $remote_user;
+    $user->first_given_name($$u{given_name} || '...');
+    $user->family_name($$u{surname} || '...');
+    $user->suffix($$u{suffix});
+    $user->prefix($$u{prefix});
+    $user->alias($$u{initials});
+    $user->email( $$u{email} );
+    $card->org($$args{home});
+    $card->barcode($$u{user_barcode} || $$u{user_id} || $$args{username});
+
+    $e->update_actor_user($user) or return $e->die_event;
+
+    modify_migrated_user_password($e, $user->id, $user->passwd);
+    $user->passwd(''); # subsequent update will set
+
+    if ($card->isnew) {
+        # create the new card and update the user
+        # object to refer to the card
+
+        $e->create_actor_card($card) or return $e->die_event;
+
+        # created a new card, tell the user object about it.
+        $user->card($card->id);
+        $e->update_actor_user($user) or return $e->die_event;
+
+    } else {
+        $e->update_actor_card($card) or return $e->die_event;
+    }
+
+    $e->commit;
+    return;
+}
+
+
+
+
+__PACKAGE__->register_method(
     method  => "update_user_setting",
     api_name    => "open-ils.actor.patron.settings.update",
 );
@@ -1009,6 +1363,7 @@ sub _add_update_cards {
     my $e = shift;
     my $patron = shift;
     my $new_patron = shift;
+    my $isnew = shift;
 
     my $evt;
 
@@ -1041,7 +1396,7 @@ sub _add_update_cards {
     }
 
     $U->create_events_for_hook('au.barcode_changed', $new_patron, $e->requestor->ws_ou)
-        if $card_changed;
+        if $card_changed && !$isnew;
 
     return ( $new_patron, undef );
 }

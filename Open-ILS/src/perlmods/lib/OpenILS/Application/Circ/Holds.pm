@@ -1086,8 +1086,10 @@ sub cancel_hold {
         return 1;
     }
 
+    my $copy = $e->retrieve_asset_copy($hold->current_copy) if $hold->current_copy;
+
     # If the hold is captured, reset the copy status
-    if( $hold->capture_time and $hold->current_copy ) {
+    if( $hold->capture_time and $copy ) {
 
         my $copy = $e->retrieve_asset_copy($hold->current_copy)
             or return $e->die_event;
@@ -1150,6 +1152,28 @@ sub cancel_hold {
         $U->create_events_for_hook('hold_request.cancel.patron', $hold, $hold->pickup_lib);
     } else {
         $U->create_events_for_hook('hold_request.cancel.staff', $hold, $hold->pickup_lib);
+    }
+
+    # perform FF tasks after the hold is successfully canceled -------
+    # do not block on FF calls.  Fire and forget.
+
+    # the hold within the lender ILS is fulfilled the moment the FF hold is 
+    # captured.  It makes no sense to cancel the lender-ILS hold after that.
+    if ($copy and !$hold->capture_time) {
+	if (!$U->is_true($U->ou_ancestor_setting_value($copy->source_lib, 'ff.remote.connector.disabled'))) {
+            my $ses = OpenSRF::AppSession->create('fulfillment.laicore');
+            $ses->request(
+                'fulfillment.laicore.hold.lender.delete_earliest',
+                $copy->source_lib,
+                $copy->barcode
+	    );
+	}
+    }
+
+    if ($hold->shelf_time) {
+        # The requested copy has made it to the borrower and a tmp copy
+        # has been created w/ a hold.
+        # TODO: cancel the hold within the borrower ILS on the tmp copy
     }
 
     return 1;
@@ -2234,6 +2258,84 @@ sub create_hold_note {
 }
 
 __PACKAGE__->register_method(
+    method    => 'copy_unblock_hold',
+    api_name  => 'open-ils.circ.hold.unblock',
+    signature => q/
+        Blocks a copy from filling one (or all, if hold is undef) hold(s)
+        @param authtoken The login session key
+        @param copy_id The copy id to block
+        @param hold_id The optional hold id to block
+        @return ID of the new object on success, Event on error
+        /
+);
+
+sub copy_unblock_hold {
+   my( $self, $conn, $auth, $copy_id ) = @_;
+   my $e = new_editor(authtoken=>$auth, xact=>1);
+   return $e->die_event unless $e->checkauth;
+   my ($reqr, $evt) = $U->checksesperm($auth, 'UPDATE_HOLD');
+   return $evt if $evt;
+
+   my $blocks = $e->search_action_copy_block_hold({item => $copy_id, hold => undef});
+   $e->delete_action_copy_block_hold($_) for (@$blocks);
+   $e->commit;
+   return undef;
+}
+
+__PACKAGE__->register_method(
+    method    => 'copy_block_hold',
+    api_name  => 'open-ils.circ.hold.block',
+    signature => q/
+        Blocks a copy from filling one (or all, if hold is undef) hold(s)
+        @param authtoken The login session key
+        @param copy_id The copy id to block
+        @param reason The reason to block the hold(s)
+        @param hold_id The optional hold id to block
+        @return ID of the new object on success, Event on error
+        /
+);
+
+sub copy_block_hold {
+   my( $self, $conn, $auth, $copy_id, $reason, $hold_id ) = @_;
+   my $e = new_editor(authtoken=>$auth, xact=>1);
+   return $e->die_event unless $e->checkauth;
+   my ($reqr, $evt) = $U->checksesperm($auth, 'UPDATE_HOLD');
+   return $evt if $evt;
+
+   my $copy = $e->retrieve_asset_copy($copy_id)
+      or return $e->die_event;
+
+   my $block = $e->search_action_copy_block_hold({item => $copy_id, hold => $hold_id})->[0];
+   if (!$block and $hold_id) { # check for universal block
+   	$block = $e->search_action_copy_block_hold({item => $copy_id, hold => undef})->[0];
+   }
+
+   if (!$block) {
+      $block = Fieldmapper::action::copy_block_hold->new;
+      $block->item($copy_id);
+      $block->hold($hold_id);
+      $block->reason($reason);
+      $block->staff($reqr->id);
+      $e->create_action_copy_block_hold($block) or return $e->die_event;
+   }
+
+   my $map_search = {target_copy => $copy_id};
+   $$map_search{hold} = $hold_id if $hold_id;
+
+   my $maps = $e->search_action_hold_copy_map($map_search);
+   my @holds;
+   for (@$maps) {
+      push @holds, $_->hold;
+      $e->delete_action_hold_copy_map($_) or return $e->event;
+   }
+
+   $e->commit;
+
+   reset_hold($self, $conn, $auth, $_) for @holds;
+   return $block->id;
+}
+
+__PACKAGE__->register_method(
     method    => 'reset_hold',
     api_name  => 'open-ils.circ.hold.reset',
     signature => q/
@@ -2343,13 +2445,15 @@ sub reset_hold_batch {
 sub _reset_hold {
     my ($self, $reqr, $hold, $reset_reason, $reset_note) = @_;
 
+    my $copy;
+
     my $e = new_editor(xact =>1, requestor => $reqr);
     my $hid = $hold->id;
     $logger->info("reseting hold ".$hid." requestor was ".$reqr->usrname." (ID ".$reqr->id.")");
     $reset_reason = (defined $reset_reason) ? $reset_reason : OILS_HOLD_MANUAL_RESET;
     $reset_note = (defined $reset_note) ? $reset_note : "";
     if( $hold->current_copy ) {
-        my $copy = $e->retrieve_asset_copy($hold->current_copy)
+        $copy = $e->retrieve_asset_copy($hold->current_copy)
             or return $e->die_event;
         if( $hold->capture_time ) {
             if( $copy->status == OILS_COPY_STATUS_ON_HOLDS_SHELF ) {
@@ -2392,6 +2496,18 @@ sub _reset_hold {
     }
 
     _create_reset_reason_entry($e, $hold, $reset_reason, $reset_note) if $reset_reason;
+
+    # Keeping this in Fulfullment because we use the old targeter.
+    # EG uses the new targeter, which adds the unfulfilled entry.
+    if ($copy) {
+        my $aufh_entry = Fieldmapper::action::unfulfilled_hold_list->new;
+        $aufh_entry->fail_time('now');
+        $aufh_entry->hold($hid);
+        $aufh_entry->current_copy($copy->id);
+        $aufh_entry->circ_lib($copy->circ_lib);
+        $e->create_action_unfulfilled_hold_list($aufh_entry) or return $e->die_event;
+    }
+
     $hold->clear_capture_time;
     $hold->clear_current_copy;
     $hold->clear_shelf_time;
@@ -2400,6 +2516,16 @@ sub _reset_hold {
 
     $e->update_action_hold_request($hold) or return $e->die_event;
     $e->commit;
+
+    # TODO: we should only cancel the lender hold 
+    # if the FF hold has not yet been captured ?
+    if ($copy and !$U->is_true($U->ou_ancestor_setting_value($copy->circ_lib, 'ff.remote.connector.disabled'))) {
+    	$U->simplereq(
+            "fulfillment.laicore",
+            "fulfillment.laicore.hold.lender.delete_earliest",
+            $copy->source_lib, $copy->barcode
+        );
+    }
 
     $U->simplereq('open-ils.hold-targeter', 
         'open-ils.hold-targeter.target', {hold => $hold->id});
@@ -2964,11 +3090,11 @@ sub create_ranged_org_filter {
     return () if $depth == $top_org->ou_type->depth;
 
     my $org_list = $U->storagereq('open-ils.storage.actor.org_unit.descendants.atomic', $selection_ou, $depth);
-    %org_filter = (circ_lib => []);
-    push(@{$org_filter{circ_lib}}, $_->id) for @$org_list;
+    %org_filter = (circ_lib => {'not in' => []});
+    push(@{$org_filter{circ_lib}{'not in'}}, $_->id) for @$org_list;
 
     $logger->info("hold org filter at depth $depth and selection_ou ".
-        "$selection_ou created list of @{$org_filter{circ_lib}}");
+        "$selection_ou created list of @{$org_filter{circ_lib}{'not in'}}");
 
     return %org_filter;
 }

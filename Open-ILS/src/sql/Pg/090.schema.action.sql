@@ -2245,5 +2245,19 @@ $func$ LANGUAGE PLPGSQL;
 CREATE TRIGGER aaa_indexing_ingest_or_delete AFTER INSERT OR UPDATE ON biblio.record_entry FOR EACH ROW EXECUTE PROCEDURE evergreen.indexing_ingest_or_delete ();
 CREATE TRIGGER aaa_auth_ingest_or_delete AFTER INSERT OR UPDATE ON authority.record_entry FOR EACH ROW EXECUTE PROCEDURE evergreen.indexing_ingest_or_delete ();
 
+CREATE OR REPLACE FUNCTION action.hold_request_mediated () RETURNS TRIGGER AS $f$
+BEGIN
+    SELECT COALESCE( (
+        SELECT actor.org_unit_ancestor_setting(
+            'ff.request.force_mediation',
+            NEW.request_lib)).value::BOOL, NEW.frozen)
+        INTO NEW.frozen;
+    RETURN NEW;
+END;
+$f$ LANGUAGE PLPGSQL;
+
+CREATE TRIGGER ahr_mediation_tgr BEFORE INSERT ON action.hold_request
+    FOR EACH ROW EXECUTE PROCEDURE action.hold_request_mediated ();
+
 COMMIT;
 
