@@ -26,6 +26,8 @@ MARC::Charset->ignore_errors(1);
 my $output = "usmarc"; 
 my $U = 'OpenILS::Application::AppUtils'; 
 
+sub initialize {}
+
 my $sclient;
 
 __PACKAGE__->register_method(
