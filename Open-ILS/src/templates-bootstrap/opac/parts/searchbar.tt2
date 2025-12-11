@@ -33,12 +33,7 @@ END;
     [% UNLESS took_care_of_form -%]
     <form action="[% ctx.opac_root %]/results" method="get">
     [%- END %]
-    [% IF ctx.page == 'rresult' && ctx.metarecord && search.metarecord_default %]
     <input type="hidden" name="modifier" value="metabib"/>
-    [% END %]
-    [% IF (ctx.page == 'place_hold' || ctx.page == 'myopac' || ctx.page == 'home' || ctx.page == 'record') && search.metarecord_default %]
-    <input type="hidden" name="modifier" value="metabib"/>
-    [% END %]
     <div class="row m-3 align-items-end">
      <!--Keyword-->
         <div class="col col-search-box">
@@ -95,6 +90,7 @@ END;
         <div class="w-100 d-block d-sm-none"></div>
 
          <!--Library-->
+<!--
         <div class="col col-search-box">
         <label id="search_locg_label" for="search_org_selector" class="form-label w-100">
             [%- l('Library: '); %]</label>
@@ -104,6 +100,7 @@ END;
                 id='search_org_selector' show_loc_groups=1 show_lassos=1
             -%]
         </div>
+-->
 
         <!-- Force next columns to break to new line below md breakpoint -->
         <div class="w-100 d-block d-md-none"></div>

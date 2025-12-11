@@ -62,6 +62,7 @@
                             <label for="expire_time">[% l('Cancel unless filled by') %]</label>
                             <duet-date-picker identifier="expire_time" name="expire_time" value="[% expire_time | html %]"></duet-date-picker>
  
+                            [% IF NOT ctx.get_org_setting(ahr.request_lib, 'ff.request.force_mediation') %]
                             <div class="form-group mt-2">
                                 <label for="frozen">[% l('Active?') %]</label>
                                 <select class="form-control" name="frozen" id="frozen">
@@ -76,6 +77,7 @@
  
                             <label for="datepicker">[% l('If suspended, activate on') %]</label>
                             <duet-date-picker identifier="datepicker" name="thaw_date" value="[% thaw_date | html %]"></duet-date-picker>
+                            [% END %]
                             
                         <div class="form-check mt-3">
                             <input class="form-check-input" type="checkbox" name="email_notify" id="email_notify"
@@ -93,6 +95,7 @@
                                 value="[% ahr.phone_notify | html %]" />
                         </div>
 
+<!--
                         [% IF ctx.get_org_setting(ctx.search_ou, 'sms.enable') == 1%]
                         <div class="form-group">
                             <label for="sms_notify">[% l('SMS notification - Enter mobile phone number') %]</label>
@@ -104,6 +107,7 @@
                             [% INCLUDE "opac/parts/sms_carrier_selector.tt2" ahr, sms_carrier_hide_warning="true", sms_carrier_hide_label="true" %]
                         </div>
                         [% END %]
+-->
 
                     [% END %]
 
