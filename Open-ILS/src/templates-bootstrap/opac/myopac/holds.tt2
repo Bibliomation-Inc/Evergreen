@@ -23,8 +23,10 @@
             <div class="col-12 text-left">
 
                     <div>
+            [%  req_lib = ctx.user.home_ou.id || ctx.user.home_ou; IF NOT ctx.get_org_setting(req_lib, 'ff.request.force_mediation') %]
             <button name="action" class="btn btn-action my-2" id="suspend" value="suspend" type="submit"><i class="fas fa-hand-paper" aria-hidden="true"></i> [% l("Suspend") %]</button>
             <button name="action" class="btn btn-opac my-2" id="activate" value="activate" type="submit"><i class="fas fa-play" aria-hidden="true"></i> [% l("Activate") %] </button>
+            [% END %]
             <button name="action" class="btn btn-danger my-2" id="cancel" value="cancel" type="submit" onclick="return confirm('[% l("Are you sure you wish to cancel the selected hold(s)?") %]');"><i class="fas fa-circle-xmark" aria-hidden="true"></i> [% l("Cancel") %]</button>
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="only_available_holds" [% IF CGI.param("available") -%] checked [% END -%] />
@@ -234,6 +236,7 @@
                             <i class="fas fa-edit" aria-hidden="true"></i>
                             [% l('Edit') %]
                         </a>
+                        [% IF NOT ctx.get_org_setting(req_lib, 'ff.request.force_mediation') %]
                         [% # Don't show the suspend button if it is suspended or fulfilled %]
                         [% IF hold.hold.status != '7' && hold.hold.status != '9' %]
                         <a class="btn btn-action btn-sm nowrap m-1" href="[% mkurl('', {action => 'suspend', 'hold_id' => ahr.id }) %]"
@@ -252,6 +255,7 @@
                             [% l('Activate') %]
                         </a>
                         [% END %]
+                        [% END # force_mediation %]
                         [% # Don't show the cancel button if it is canceled %]
                         [% IF hold.hold.status != '6' %]
                         <a class="btn btn-danger btn-sm nowrap m-1" href="[% mkurl('', {action => 'cancel', 'hold_id' => ahr.id }) %]"

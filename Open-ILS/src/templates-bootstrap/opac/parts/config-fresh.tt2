@@ -64,7 +64,7 @@ ebook_api.overdrive.base_uris = [ 'http://elm.lib.overdrive.com/' ];
 ##############################################################################
 # Enable "Forgot your password?" prompt at login
 ##############################################################################
-reset_password = 'true';
+reset_password = 'false';
 
 ##############################################################################
 # Hide various options from user preferences that you might not want to expose
@@ -191,7 +191,7 @@ search.basic_config = {
 };
 
 # Make metarecord search the default.
-#search.metarecord_default = 1;
+search.metarecord_default = 1;
 
 # Whether to show highlighting by default or hide it by default (overwritten when the user has a non-null setting and is logged in or searches with the url parameters
 # 0 to hide highlighting by default, 1 to show it. Defaults to 1 when null.
@@ -215,8 +215,8 @@ ctx.maintenance_type = l('info');
 # Depth Button/Checkbox
 # Recommendation: Do not enable button for basic search without enabling the
 # checkbox for the results page
-ctx.depth_sel_checkbox = 1; # Results Page Checkbox Toggle
-ctx.depth_sel_button = 1; # Basic Search Submit Button
+ctx.depth_sel_checkbox = 0; # Results Page Checkbox Toggle
+ctx.depth_sel_button = 0; # Basic Search Submit Button
 ctx.depth_sel_depth = 0; # Depth to set to
 ctx.depth_sel_button_label = l('All Libraries');
 ctx.depth_sel_button_class = 'btn-opac';

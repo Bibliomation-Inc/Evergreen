@@ -166,8 +166,7 @@
                 [% IF NOT metarecords.disabled %]
                 <div class="form-check">
                     <input type='checkbox' name="modifier" value="metabib"
-                        [%- CGI.param('modifier').grep('metabib').size || search.metarecord_default ?
-                            ' checked="checked"' : '' %]
+                        checked="checked"
                         id='opac.result.ismetabib' class="form-check-input" />
                     <label for='opac.result.ismetabib' class="form-check-label">
                         [% l("Group Formats and Editions") %]</label>
