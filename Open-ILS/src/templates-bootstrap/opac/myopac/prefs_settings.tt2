@@ -72,7 +72,7 @@
 
             <hr class="w-100" />
 
-            <h3 class="w-100">[% l('Hold Settings') %]</h3>
+            <h3 class="w-100">[% l('ILL Request Settings') %]</h3>
 
                 [%- setting = 'opac.default_pickup_location'; -%]
                 <label class="form-label" for='[% setting %]'>[% l("Preferred pickup location") %]</label>
@@ -121,13 +121,13 @@
                             <div class="form-check w-100">
                                 <input type="checkbox" id="waiver_place_holds[% waiver.id %]" name="waiver_place_holds" class="form-check-input"
                                     value="[% waiver.id %]" [% waiver.place_holds == 't' ? 'checked="checked"' : '' %]/>
-                                <label class="form-check-label" for="waiver_place_holds[% waiver.id %]">[% l('Place Holds') %]</label>
+                                <label class="form-check-label" for="waiver_place_holds[% waiver.id %]">[% l('Place ILL Requests') %]</label>
                             </div>
 
                             <div class="form-check w-100">
                                 <input type="checkbox" id="waiver_pickup_holds[% waiver.id %]" name="waiver_pickup_holds" class="form-check-input"
                                     value="[% waiver.id %]" [% waiver.pickup_holds == 't' ? 'checked="checked"' : '' %]/>
-                                <label class="form-check-label" for="waiver_pickup_holds[% waiver.id %]">[% l('Pick Up Holds') %]</label>
+                                <label class="form-check-label" for="waiver_pickup_holds[% waiver.id %]">[% l('Pick Up ILL Requests') %]</label>
                             </div>
 
                             <div class="form-check w-100">
@@ -149,11 +149,11 @@
 
                         <div class="form-check w-100">
                             <input for="waiver_place_holds" type="checkbox" class="form-check-input" name="waiver_place_holds" id="waiver_place_holds" value="new"/>
-                            <label class="form-check-label">[% l('Place Holds') %]</label>
+                            <label class="form-check-label">[% l('Place ILL Requests') %]</label>
                         </div>
                         <div class="form-check w-100">
                             <input type="checkbox" class="form-check-input" name="waiver_pickup_holds" id="waiver_pickup_holds" value="new"/>
-                            <label for="waiver_pickup_holds" class="form-check-label">[% l('Pick Up Holds') %]</label>
+                            <label for="waiver_pickup_holds" class="form-check-label">[% l('Pick Up ILL Requests') %]</label>
                         </div>
                         <div class="form-check w-100">
                             <input type="checkbox" class="form-check-input" name="waiver_checkout_items" id="waiver_checkout_items" value="new"/>

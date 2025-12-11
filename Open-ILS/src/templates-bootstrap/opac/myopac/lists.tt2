@@ -228,7 +228,7 @@
         <div>
         [% IF bbag.items.size %]
             <div class="my-2 col-9">
-                <button name="action" class="btn btn-action btn-sm my-2" type="submit" value="place_hold" id="place_hold">[% l('Place hold') %]
+                <button name="action" class="btn btn-action btn-sm my-2" type="submit" value="place_hold" id="place_hold">[% l('Place ILL Request') %]
                     <span class="result_count hidden">
                         [%- l('([_1])', 0); -%]
                     </span>
