@@ -10,7 +10,7 @@
       </button>
       <div class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="cartDropdown">
         <a class="dropdown-item" role="menuitem"  href="[% mkurl(ctx.opac_root _ '/mylist', {}) %]"><i class="fas fa-glasses" aria-hidden="true"></i> [% l('View Basket') %]</a>
-        <a class="dropdown-item" role="menuitem"  href="[% mkurl(ctx.opac_root _ '/mylist/move', { action => 'place_hold', entire_list => 1 }) %]"><i class="fas fa-book" aria-hidden="true"></i> [% l('Place Holds') %]</a>
+        <a class="dropdown-item" role="menuitem"  href="[% mkurl(ctx.opac_root _ '/mylist/move', { action => 'place_hold', entire_list => 1 }) %]"><i class="fas fa-book" aria-hidden="true"></i> [% l('Place ILL Requests') %]</a>
         <a class="dropdown-item" role="menuitem"  href="[% mkurl(ctx.opac_root _ '/mylist/print', {}) %]"><i class="fas fa-print" aria-hidden="true"></i> [% l('Print Title Details') %]</a>
         <a class="dropdown-item" role="menuitem"  href="[% mkurl(ctx.opac_root _ '/mylist/email', {}) %]"><i class="fas fa-envelope" aria-hidden="true"></i> [% l('Email Title Details') %]</a>
         [% IF !ctx.is_browser_staff %]

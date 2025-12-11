@@ -391,7 +391,7 @@
                                     <span role="text">
                                         <i class="fas fa-check" aria-hidden="true"></i>
                                         <span class="result_place_hold">
-                                            [% l('Place Hold') %]
+                                            [% l('Place ILL Request') %]
                                         </span>
                                         <span class="result_count hidden">
                                             [%- l('([_1])', ctx.mylist.size); -%]
@@ -426,7 +426,7 @@
                                             class="btn btn-action hidden text-start" rel="nofollow" vocab="">
                                             <span role="text">
                                                 <i class="fas fa-book-reader" aria-hidden="true"></i> 
-                                                <span class="result_place_hold">[% l('Place Hold on E-Item') %]</span>
+                                                <span class="result_place_hold">[% l('Place ILL Request on E-Item') %]</span>
                                                 <span class="result_count hidden">
                                                     [%- l('([_1])', ctx.mylist.size); -%]
                                                 </span>
