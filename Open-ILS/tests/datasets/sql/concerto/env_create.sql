@@ -82,8 +82,8 @@ $$ LANGUAGE 'plpgsql';
 CREATE FUNCTION evergreen.populate_copy 
     (circlib INTEGER, ownlib INTEGER, barcode TEXT, label TEXT)
 RETURNS void AS $$
-    INSERT INTO asset.copy (call_number, circ_lib, creator, editor, loan_duration, fine_level, price, barcode)
-        SELECT id, $1, 1, 1, 1, 1, (SELECT evergreen.generate_price()), $3 || id::text
+    INSERT INTO asset.copy (call_number, circ_lib, source_lib, creator, editor, loan_duration, fine_level, price, barcode)
+        SELECT id, $1, $1, 1, 1, 1, 1, (SELECT evergreen.generate_price()), $3 || id::text
         FROM asset.call_number
         WHERE record > 0 AND label LIKE $4 || '%' AND owning_lib = $2
         ORDER BY id;
