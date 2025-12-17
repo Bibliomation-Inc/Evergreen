@@ -1773,7 +1773,11 @@ osrfStringArray* generatePcrudVisibilityConditions ( osrfMethodContext* ctx, osr
 
     } else if (local_context_fields && local_context_fields->size > 0) {
         for (int i = 0; i < local_context_fields->size; i++) {
-            osrfStringArrayAdd( context_org_array, osrfStringArrayGetString(local_context_fields, i) );
+            growing_buffer* fq_context_org_buf = osrf_buffer_init(64);
+            osrf_buffer_fadd(fq_context_org_buf, "%s.%s", classname, osrfStringArrayGetString(local_context_fields, i));
+            const char* fq_context_org = osrf_buffer_release(fq_context_org_buf);
+            osrfStringArrayAdd( context_org_array, fq_context_org );
+            free(fq_context_org);
         }
     }
 
