@@ -114,6 +114,17 @@ CREATE INDEX cp_create_date  ON asset.copy (create_date);
 CREATE INDEX cp_extant_by_circ_lib_idx ON asset.copy(circ_lib) WHERE deleted = FALSE OR deleted IS FALSE;
 CREATE RULE protect_copy_delete AS ON DELETE TO asset.copy DO INSTEAD UPDATE asset.copy SET deleted = TRUE WHERE OLD.id = asset.copy.id RETURNING *;
 
+CREATE OR REPLACE FUNCTION asset.force_source_lib () RETURNS TRIGGER AS $$
+BEGIN
+    NEW.source_lib := COALESCE(NEW.source_lib, NEW.circ_lib);
+    RETURN NEW;
+END;
+$$ LANGUAGE PLPGSQL;
+
+CREATE TRIGGER force_source_lib_tgr
+    BEFORE INSERT ON asset.copy FOR EACH ROW
+    EXECUTE PROCEDURE asset.force_source_lib();
+
 CREATE TABLE asset.copy_part_map (
     id          SERIAL  PRIMARY KEY,
     target_copy BIGINT  NOT NULL, -- points o asset.copy
