@@ -19154,3 +19154,36 @@ SELECT evergreen.setup_delete_protect_rule(
 
 COMMIT;
 
+---------------------
+-- This comes after the commit because the table may already exists, and that's fine
+---------------------
+
+CREATE TABLE action.copy_block_hold (
+    id serial primary key,
+    item bigint NOT NULL,
+    hold bigint REFERENCES action.hold_request(id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
+    staff bigint NOT NULL REFERENCES actor.usr(id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
+    block_time timestamp with time zone DEFAULT now() NOT NULL,
+    reason text NOT NULL
+);
+
+CREATE OR REPLACE FUNCTION evergreen.action_copy_block_hold_item_inh_fkey()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ COST 50
+AS $function$
+BEGIN
+    PERFORM 1 FROM asset.copy WHERE id = NEW.item;
+    IF NOT FOUND THEN
+        RAISE foreign_key_violation USING MESSAGE = FORMAT(
+            $$Referenced asset.copy id not found, item:%s$$, NEW.item
+        );
+    END IF;
+    RETURN NEW;
+END;
+$function$;
+
+CREATE CONSTRAINT TRIGGER inherit_copy_block_hold_item_fkey
+    AFTER INSERT OR UPDATE ON action.copy_block_hold DEFERRABLE INITIALLY IMMEDIATE
+    FOR EACH ROW EXECUTE PROCEDURE evergreen.action_copy_block_hold_item_inh_fkey();
+
