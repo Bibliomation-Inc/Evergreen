@@ -44,8 +44,10 @@ export class HoldsGridComponent implements OnInit {
     @Input() initialPickupLib: number | IdlObject;
     @Input() hidePickupLibFilter: boolean;
 
-    // Setting a value here puts us into "pull list" mode.
+    // Setting a value here puts us into "pull list" mode ...
     @Input() pullListOrg: number;
+    // but setting this to true disables that.
+    @Input() hidePullListLibFilter: boolean;
 
     // If true, only retrieve holds with a Hopeless Date
     // and enable related Actions
@@ -205,6 +207,7 @@ export class HoldsGridComponent implements OnInit {
     ngOnInit() {
         this.initDone = true;
         this.pickupLib = this.org.get(this.initialPickupLib);
+        this.hidePullListLibFilter ||= this.pullListOrg ? false : true;
 
         if (this.preFetchSetting) {
             this.store.getItem(this.preFetchSetting).then(

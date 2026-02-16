@@ -66,7 +66,7 @@
       </div>
     </div>
 
-    <div class="row" *ngIf="pullListOrg">
+    <div class="row" *ngIf="!hidePullListLibFilter">
       <div class="col-lg-3 mb-2">
         <div class="input-group">
           <label class="input-group-text form-label" for="pullListOrgSelect" i18n>View Pull List For:</label>
@@ -229,22 +229,6 @@
         i18n-label label="Show Holds For Title" i18n-group group="Show"
         (onClick)="showHoldsForTitle($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-column i18n-label label="Hold ID" path='id' [index]="true" datatype="id">
-      </eg-grid-column>
-
-      <eg-grid-column i18n-label label="Shelving Location" path='acpl_name' [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="CN Full label" path='cn_full_label' [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Part label" path='p_label' [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Author" path='author' [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Series Title" path='series_title' [hidden]="true"></eg-grid-column>
-      <ng-template #titleTmpl let-hold="row">
-        <a routerLink="/staff/catalog/record/{{hold.record_id}}" target="_blank">
-          {{hold.title}}
-        </a>
-      </ng-template>
-      <eg-grid-column i18n-label label="Title" [hidden]="true" name='title'
-        [cellTemplate]="titleTmpl"></eg-grid-column>
-      <eg-grid-column i18n-label label="Publication Year" path='pubdate' [hidden]="true"></eg-grid-column>
       <ng-template #barcodeTmpl let-hold="row" let-col="col">
         <a href="/eg/staff/cat/item/{{hold.cp_id}}/summary" target="_blank">
           <ng-container *ngIf="col.name === 'current_item' && hold.current_copy">
@@ -255,18 +239,42 @@
           </ng-container>
         </a>
       </ng-template>
-      <eg-grid-column i18n-label label="Current Item" name='current_item'
-        [cellTemplate]="barcodeTmpl" [sortable]="false" [multiSortable]="false">
-      </eg-grid-column>
-      <eg-grid-column i18n-label label="Requested Item" name='requested_item'
-        [cellTemplate]="barcodeTmpl" [sortable]="false" [multiSortable]="false">
-      </eg-grid-column>
+
+      <ng-template #titleTmpl let-hold="row">
+        <a routerLink="/staff/catalog/record/{{hold.record_id}}" target="_blank">
+          {{hold.title}}
+        </a>
+      </ng-template>
+
+      <eg-grid-column i18n-label label="Request ID" path='id' [index]="true" datatype="id"></eg-grid-column>
+      <eg-grid-column i18n-label label="Item Barcode" name='current_item' [cellTemplate]="barcodeTmpl" [sortable]="false" [multiSortable]="false"></eg-grid-column>
+      <eg-grid-column i18n-label label="Item From" path='cl_shortname'></eg-grid-column>
+      <eg-grid-column i18n-label label="Request Date" path='request_time' datatype="timestamp"></eg-grid-column>
+      <eg-grid-column i18n-label label="Expire Time" path='expire_time' datatype="timestamp"></eg-grid-column>
+      <eg-grid-column i18n-label label="Supended" path='frozen' datatype="bool"></eg-grid-column>
+      <eg-grid-column i18n-label label="Active Date" path='thaw_date' datatype="timestamp"></eg-grid-column>
+      <eg-grid-column i18n-label label="Requesting Library" path='rl_shortname'></eg-grid-column>
       <eg-grid-column i18n-label label="Pickup Library" path='pl_shortname'></eg-grid-column>
-      <eg-grid-column i18n-label label="Hold Type" path='hold_type'></eg-grid-column>
-      <eg-grid-column i18n-label label="Potential Items" path='potentials' datatype="int">
+      <eg-grid-column i18n-label label="Title" name='title' [cellTemplate]="titleTmpl"></eg-grid-column>
+      <eg-grid-column i18n-label label="Potential Items" path='potentials' datatype="int"></eg-grid-column>
+      <eg-grid-column i18n-label label="Hold Status" [cellTemplate]="statusTemplate" name="status_string"
+        [sortable]="false" [multiSortable]="false">
       </eg-grid-column>
-      <eg-grid-column i18n-label label="Request Date" path='request_time' 
-        datatype="timestamp" [datePlusTime]="true"></eg-grid-column>
+
+
+      <!-- ----------------------------------------------------------------------------------------------- -->
+
+
+      <eg-grid-column i18n-label label="Shelving Location" path='acpl_name' [hidden]="true"></eg-grid-column>
+      <eg-grid-column i18n-label label="CN Full label" path='cn_full_label' [hidden]="true"></eg-grid-column>
+      <eg-grid-column i18n-label label="Part label" path='p_label' [hidden]="true"></eg-grid-column>
+      <eg-grid-column i18n-label label="Author" path='author' [hidden]="true"></eg-grid-column>
+      <eg-grid-column i18n-label label="Series Title" path='series_title' [hidden]="true"></eg-grid-column>
+      <eg-grid-column i18n-label label="Publication Year" path='pubdate' [hidden]="true"></eg-grid-column>
+      <eg-grid-column i18n-label label="Requested Item" name='requested_item' [hidden]="true"
+        [cellTemplate]="barcodeTmpl" [sortable]="false" [multiSortable]="false">
+      </eg-grid-column>
+      <eg-grid-column i18n-label label="Hold Type" path='hold_type' [hidden]="true"></eg-grid-column>
 
       <ng-template #userBarcodeTmpl let-hold="row">
         <a href="/eg/staff/circ/patron/{{hold.usr_id}}/checkout" target="_blank">
@@ -277,17 +285,16 @@
         [cellTemplate]="userBarcodeTmpl" [hidden]="true"></eg-grid-column>
 
       <eg-grid-column i18n-label label="Patron Home Library" path="ul_shortname" [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Patron Alias" path="usr_alias"></eg-grid-column>
+      <eg-grid-column i18n-label label="Patron Alias" path="usr_alias" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Capture Date" path='capture_time'
-          datatype="timestamp" [datePlusTime]="true"></eg-grid-column>
+          datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Available Date" path='shelf_time'
-          datatype="timestamp" [datePlusTime]="true"></eg-grid-column>
+          datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
 
-      <eg-grid-column i18n-label label="Hold Status" [cellTemplate]="statusTemplate" name="status_string"
-        [sortable]="false" [multiSortable]="false">
-      </eg-grid-column>
-      <eg-grid-column i18n-label label="Queue Position"
+      <eg-grid-column i18n-label label="Relative Queue Position"
           path='relative_queue_position' [hidden]="true" datatype="int"></eg-grid-column>
+      <eg-grid-column i18n-label label="Global Queue Position"
+          path='global_queue_position' [hidden]="true" datatype="int"></eg-grid-column>
       <eg-grid-column path='usr_id' i18n-label label="User ID" [hidden]="true"></eg-grid-column>
       <eg-grid-column path='usr_usrname' i18n-label label="Username" [hidden]="true"></eg-grid-column>
 
@@ -305,13 +312,11 @@
       <eg-grid-column i18n-label label="Checkin Time" path='checkin_time' datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Return Time" path='return_time' datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Last Targeting Date/Time" path='prev_check_time' datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Expire Time" path='expire_time' datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Hold Cancel Date/Time" path='cancel_time' datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Cancelation note" path='cancel_note' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Hold Target" path='target' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Fulfilling Staff" path='fulfillment_staff' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Fulfilling Library" path='fulfillment_lib' [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Requesting Library" path='rl_shortname' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Requesting User" path='requestor' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="User" path='usr' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Selection Library" path='sl_shortname' [hidden]="true"></eg-grid-column>
@@ -321,8 +326,6 @@
       <eg-grid-column i18n-label label="Notifications SMS Number" path='sms_notify' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Notify by Email?" path='email_notify' datatype="bool" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="SMS Carrier" path='sms_carrier' [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Currently Frozen" path='frozen' datatype="bool" [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Activation Date" path='thaw_date' datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Top of Queue" path='cut_in_line' datatype="bool" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Is Mint Condition" path='mint_condition' datatype="bool" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Shelf Expire Time" path='shelf_expire_time' datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
@@ -353,7 +356,6 @@
       <eg-grid-column i18n-label label="Item ID" path='cp_id' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Item Number on Call Number" path='cp_copy_number' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Owning Library" path='ol_shortname' [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Item Circulating Library" path='cl_shortname' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Fine Level" path='cp_fine_level' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Can Circulate" path='cp_circulate' datatype="bool" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Deposit Amount" path='cp_deposit_amount' datatype="bool" [hidden]="true"></eg-grid-column>
