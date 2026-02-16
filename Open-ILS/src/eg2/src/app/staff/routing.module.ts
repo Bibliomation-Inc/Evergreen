@@ -51,6 +51,10 @@ const routes: Routes = [{
         path: 'splash',
         component: StaffSplashComponent
     }, {
+        path: 'ill',
+        loadChildren: () =>
+            import('./ill/ill.module').then(m => m.ILLModule)
+    }, {
         path: 'circ',
         loadChildren: () =>
             import('./circ/routing.module').then(m => m.CircRoutingModule)
