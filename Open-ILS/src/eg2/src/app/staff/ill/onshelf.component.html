@@ -5,7 +5,7 @@
     [roles]="false" role="tablist">
 
   <li role="presentation" ngbNavItem="borrower">
-    <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)" i18n>Requests By My Patrons</a>
+    <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)" i18n>For My Patrons</a>
     <ng-template ngbNavContent>
       <eg-holds-grid 
         persistKey="ff.ill.onshelf.borrower"
@@ -23,7 +23,7 @@
   </li>
 
   <li role="presentation" ngbNavItem="lender">
-    <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)" i18n>Requests From Other Libraries</a>
+    <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)" i18n>At Other Libraries</a>
     <ng-template ngbNavContent>
       <eg-holds-grid 
         persistKey="ff.ill.onshelf.lender"
