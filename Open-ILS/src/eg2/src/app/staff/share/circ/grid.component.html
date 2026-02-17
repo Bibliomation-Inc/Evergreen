@@ -36,6 +36,7 @@
   [rowFlairIsEnabled]="true" [rowFlairCallback]="rowFlair"
   [rowClassCallback]="rowClass" [persistKey]="persistKey"
   [useLocalSort]="true" [cellTextGenerator]="cellTextGenerator">
+  [showFields]="showFields"
 
   <ng-container *ngIf="menuStyle === 'full'">
 
@@ -113,7 +114,7 @@
   <eg-grid-column [index]="true" path="index" [hidden]="true"
     label="Row Index" i18n-label></eg-grid-column>
 
-  <eg-grid-column path="circ.id" 
+  <eg-grid-column path="circ.id"
     label="Circ ID" i18n-label></eg-grid-column>
 
   <eg-grid-column path="dueDate" label="Due Date" i18n-label
@@ -123,7 +124,10 @@
   <eg-grid-column path="copy.barcode" label="Barcode" i18n-label
     [cellTemplate]="barcodeTemplate"></eg-grid-column>
 
-  <eg-grid-column path="title" label="Title" i18n-label 
+  <eg-grid-column path="copy.circ_lib.shortname" label="Copy Library" i18n-label
+    [cellTemplate]="barcodeTemplate"></eg-grid-column>
+
+  <eg-grid-column path="title" label="Title" i18n-label
     [cellTemplate]="titleTemplate"></eg-grid-column>
 
   <eg-grid-column path="circ.stop_fines" label="Fines Stopped"
@@ -149,6 +153,8 @@
 
   <eg-grid-column path="nonCatCount" label="Non-Cataloged Count"
     [hidden]="true" i18n-label></eg-grid-column>
+
+  <eg-grid-column path="circ.usr.fist_given_name" [required]="true" [hidden]="true"></eg-grid-column>
 
   <eg-grid-column path="circ.*" idlClass="circ" [hidden]="true"></eg-grid-column>
 

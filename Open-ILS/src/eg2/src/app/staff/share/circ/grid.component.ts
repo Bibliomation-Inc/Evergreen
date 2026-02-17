@@ -65,6 +65,7 @@ const CIRC_FLESH_FIELDS = {
 })
 export class CircGridComponent implements OnInit {
 
+    @Input() showFields: string;
     @Input() persistKey: string;
     @Input() printTemplate: string; // defaults to items_out
     @Input() menuStyle: 'full' | 'slim' | 'none' = 'full';
