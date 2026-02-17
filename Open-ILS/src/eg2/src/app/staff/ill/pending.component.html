@@ -1,0 +1,45 @@
+
+
+<ul ngbNav #holdsNav="ngbNav" class="nav-tabs"
+    [activeId]="ill_role" [keyboard]="true" (navChange)="beforeTabChange($event)"
+    [roles]="false" role="tablist">
+
+  <li role="presentation" ngbNavItem="borrower">
+    <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)" i18n>Requests By My Patrons</a>
+    <ng-template ngbNavContent>
+      <eg-holds-grid 
+        persistKey="ff.ill.pending.borrower"
+        (placeHoldRequested)="newHold()"
+        [noLoadProgress]="true"
+        [hideHoldsCount]="false"
+        [enablePreFetch]="true"
+        [hidePickupLibFilter]="true"
+        [hidePullListLibFilter]="true"
+        [initialPickupLib]="contextOrg"
+        [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
+        showFields="id,current_item,cl_shortname,request_time,expire_time,frozen,thaw_date,status_string,rl_shortname,pl_shortname,title"
+      />
+    </ng-template>
+  </li>
+
+  <li role="presentation" ngbNavItem="lender">
+    <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)" i18n>Requests From Other Libraries</a>
+    <ng-template ngbNavContent>
+      <eg-holds-grid 
+        persistKey="ff.ill.pending.lender"
+        [noLoadProgress]="true"
+        [hideHoldsCount]="false"
+        [enablePreFetch]="true"
+        [hidePickupLibFilter]="true"
+        [hidePullListLibFilter]="true"
+        [pullListOrg]="contextOrg"
+        [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
+        showFields="id,current_item,cl_shortname,request_time,expire_time,frozen,thaw_date,status_string,rl_shortname,pl_shortname,title"
+      />
+    </ng-template>
+  </li>
+</ul>
+
+<ng-container>
+  <div [ngbNavOutlet]="holdsNav"></div>
+</ng-container>

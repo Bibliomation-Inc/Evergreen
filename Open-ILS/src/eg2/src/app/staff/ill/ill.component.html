@@ -1,0 +1,108 @@
+<eg-staff-banner bannerText="ILL Management" i18n-bannerText></eg-staff-banner>
+
+<div id="ill-grid" [ngClass]="{'show-nav': showNav}"
+  role="region" aria-label="Account summary" i18n-aria-label>
+
+  <nav id="ill-nav" aria-label="Account details" i18n-aria-label>
+    <button type="button" (click)="toggleNavPane()"
+      class="nav-link btn btn-sm svg-icon-button ill-nav-toggle"
+      [title]="showNav ? 'Hide Navigation' : 'Show Navigation'" i18n-title
+      [attr.aria-label]="showNav ? 'Hide Navigation' : 'Show Navigation'" i18n-aria-label>
+      <!-- Our Material Icons set is missing some icons. Using SVG: -->
+      <span class="mat-icon-in-button" aria-hidden="true">
+        <!-- left_panel_open in SVG -->
+        <ng-container *ngIf="showNav">
+          <svg xmlns="http://www.w3.org/2000/svg" role="img" height="24" viewBox="0 -960 960 960" width="24">
+            <path d="M500-640v320l160-160-160-160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm120-80v-560H200v560h120Zm80 0h360v-560H400v560Zm-80 0H200h120Z"/>
+          </svg>
+        </ng-container>
+        <!-- left_panel_close in SVG -->
+        <ng-container *ngIf="!showNav">
+          <svg xmlns="http://www.w3.org/2000/svg" role="img" height="24" viewBox="0 -960 960 960" width="24">
+            <path d="M660-320v-320L500-480l160 160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm120-80v-560H200v560h120Zm80 0h360v-560H400v560Zm-80 0H200h120Z"/>
+          </svg>
+        </ng-container>
+      </span>
+    </button>
+    
+    <ul ngbNav #illNav="ngbNav" class="nav-tabs flex-column" 
+      [keyboard]="true" [roles]="false" role="tablist"
+      [activeId]="activeTab" (navChange)="beforeTabChange($event)">
+
+      <li role="presentation" ngbNavItem="singlescan">
+        <button type="button" role="tab" ngbNavLink (click)="navItemClick('singlescan', $event)"
+          routerLink="/staff/ill/singlescan" i18n>Single Scan</button>
+        <ng-template ngbNavContent>
+          <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Single Scan"></eg-title>
+          <div class="">
+            <ff-singlescan [contextOrg]="contextOrg" [barcode]="route_barcode"></ff-singlescan>
+          </div>
+        </ng-template>
+      </li>
+
+      <li role="presentation" ngbNavItem="pending">
+        <button type="button" role="tab" ngbNavLink (click)="navItemClick('pending', $event)"
+          routerLink="/staff/ill/pending/{{ill_role}}" i18n>Pending Requests</button>
+        <ng-template ngbNavContent>
+          <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
+          <div class="">
+            <ff-ill-requests [contextOrg]="contextOrg" [ill_role]="ill_role"></ff-ill-requests>
+          </div>
+        </ng-template>
+      </li>
+
+      <li role="presentation" ngbNavItem="incoming">
+        <button type="button" role="tab" ngbNavLink (click)="navItemClick('incoming', $event)"
+          routerLink="/staff/ill/incoming/{{ill_role}}" i18n>Incoming Transits</button>
+        <ng-template ngbNavContent>
+          <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Incoming Transits"></eg-title>
+          <div class="">
+            <ff-transits [contextOrg]="contextOrg" direction="incoming" [ill_role]="ill_role"></ff-transits>
+          </div>
+        </ng-template>
+      </li>
+
+      <li role="presentation" ngbNavItem="outgoing">
+        <button type="button" role="tab" ngbNavLink (click)="navItemClick('outgoing', $event)"
+          routerLink="/staff/ill/outgoing/{{ill_role}}" i18n>Outgoing Transits</button>
+        <ng-template ngbNavContent>
+          <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Outgoing Transits"></eg-title>
+          <div class="">
+            <ff-transits [contextOrg]="contextOrg" direction="outgoing" [ill_role]="ill_role"></ff-transits>
+          </div>
+        </ng-template>
+      </li>
+
+      <li role="presentation" ngbNavItem="onshelf">
+        <button type="button" role="tab" ngbNavLink (click)="navItemClick('onshelf', $event)"
+          routerLink="/staff/ill/onshelf/{{ill_role}}" i18n>On Shelf</button>
+        <ng-template ngbNavContent>
+          <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
+          <div class="">
+            <ff-ill-onshelf [contextOrg]="contextOrg" [ill_role]="ill_role"></ff-ill-onshelf>
+          </div>
+        </ng-template>
+      </li>
+
+      <li role="presentation" ngbNavItem="circulating">
+        <button type="button" role="tab" ngbNavLink (click)="navItemClick('circulating', $event)"
+          routerLink="/staff/ill/circulating/{{ill_role}}" i18n>Currently Circulating</button>
+        <ng-template ngbNavContent>
+          <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Currently Circulating"></eg-title>
+          <div class="">
+            <ff-ill-circulating [contextOrg]="contextOrg" [ill_role]="ill_role"></ff-ill-circulating>
+          </div>
+        </ng-template>
+      </li>
+
+    </ul>
+  </nav>  
+
+
+  <div id="ill-tabs">
+    <div *ngIf="!loading">
+      <div [ngbNavOutlet]="illNav"></div>
+    </div>
+  </div>
+  
+</div> <!-- #ill-grid -->
