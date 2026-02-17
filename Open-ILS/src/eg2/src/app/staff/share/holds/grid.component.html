@@ -230,7 +230,7 @@
         (onClick)="showHoldsForTitle($event)"></eg-grid-toolbar-action>
 
       <ng-template #barcodeTmpl let-hold="row" let-col="col">
-        <a href="/eg/staff/cat/item/{{hold.cp_id}}/summary" target="_blank">
+        <a *ngIf="hold.cp_barcode" href="/eg/staff/cat/item/{{hold.cp_id}}/summary" target="_blank">
           <ng-container *ngIf="col.name === 'current_item' && hold.current_copy">
             {{hold.cp_barcode}}
           </ng-container>
