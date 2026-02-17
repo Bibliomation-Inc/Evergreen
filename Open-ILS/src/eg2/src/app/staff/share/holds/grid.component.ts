@@ -219,6 +219,10 @@ export class HoldsGridComponent implements OnInit {
         this.pickupLib = this.org.get(this.initialPickupLib);
         this.hidePullListLibFilter ||= this.pullListOrg ? false : true;
 
+        if (this.pullListOrg && this.hidePullListLibFilter) {
+            this.plCompLoaded = true;
+        }
+
         if (this.preFetchSetting) {
             this.store.getItem(this.preFetchSetting).then(
                 applied => this.enablePreFetch = Boolean(applied)
