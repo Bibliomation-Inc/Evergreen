@@ -50,6 +50,8 @@ export class HoldsGridComponent implements OnInit {
     // but setting this to true disables that.
     @Input() hidePullListLibFilter: boolean;
 
+    @Input() hidePrintPullList = false;
+
     // If true, only retrieve holds with a Hopeless Date
     // and enable related Actions
     @Input() hopeless: boolean;
@@ -88,6 +90,8 @@ export class HoldsGridComponent implements OnInit {
     // Some default columns and actions do or don't make sense when
     // displaying holds for a specific patron vs. e.g. a specific title.
     @Input() patronFocused = false;
+
+    @Input() currentShelfLib: any;
 
     mode: 'list' | 'detail' | 'manage' = 'list';
     initDone = false;
@@ -412,6 +416,14 @@ export class HoldsGridComponent implements OnInit {
     applyFilters(): any {
 
         const filters: any = {};
+
+        if (this.copyLocationIds.length) {
+            filters['acpl.id'] = this.copyLocationIds;
+        }
+
+        if (this.currentShelfLib) {
+            filters['h.current_shelf_lib'] = this.currentShelfLib;
+        }
 
         if (this.copyLocationIds.length) {
             filters['acpl.id'] = this.copyLocationIds;

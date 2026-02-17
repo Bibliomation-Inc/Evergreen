@@ -11,7 +11,7 @@
 <eg-hold-manage-dialog #manageDialog></eg-hold-manage-dialog>
 <eg-confirm-dialog #uncancelDialog
   i18n-dialogTitle i18n-dialogBody
-  i18n-dialogTitle="Un-Cancel Holds"
+  i18n-dialogTitle="Un-Cancel ILLs"
   dialogBody="Un-Cancel {{uncancelHoldCount}} hold(s)?"
 ></eg-confirm-dialog>
 <eg-hold-copy-locations-dialog #copyLocationsDialog
@@ -49,7 +49,7 @@
 
   <ng-container *ngIf="mode === 'list' && initComplete()">
 
-    <h4 *ngIf="!hideHoldsCount" i18n>Holds Count: {{holdsCount}}</h4>
+    <h4 *ngIf="!hideHoldsCount" i18n>ILL Count: {{holdsCount}}</h4>
 
     <div class="row" *ngIf="!hidePickupLibFilter">
       <div class="col-lg-5">
@@ -141,13 +141,13 @@
       [multiSortable]="true" [persistKey]="persistKey"
       (onRowActivate)="showDetail($event)">
 
-      <eg-grid-toolbar-button *ngIf="pullListOrg" 
+      <eg-grid-toolbar-button *ngIf="pullListOrg && !hidePrintPullList" 
         (onClick)="printHolds()" i18n-label label="Print Full List">
       </eg-grid-toolbar-button>
 
       <eg-grid-toolbar-checkbox
         (onChange)="preFetchHolds($event)" *ngIf="!hopeless && preFetchSetting"
-        [initialValue]="enablePreFetch" i18n-label label="Pre-Fetch All Holds">
+        [initialValue]="enablePreFetch" i18n-label label="Pre-Fetch All ILLs">
       </eg-grid-toolbar-checkbox>
 
       <ng-container *ngIf="showPlaceHoldButton">
@@ -208,7 +208,7 @@
       </eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action
-        i18-group group="Hold" i18n-label label="Print Holds"
+        i18-group group="Hold" i18n-label label="Print ILLs"
         (onClick)="printHolds()"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action *ngIf="hopeless"
@@ -226,7 +226,7 @@
         (onClick)="showTitle($event)"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action
-        i18n-label label="Show Holds For Title" i18n-group group="Show"
+        i18n-label label="Show ILLs For Title" i18n-group group="Show"
         (onClick)="showHoldsForTitle($event)"></eg-grid-toolbar-action>
 
       <ng-template #barcodeTmpl let-hold="row" let-col="col">
