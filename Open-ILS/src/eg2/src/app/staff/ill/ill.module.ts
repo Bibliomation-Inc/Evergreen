@@ -9,6 +9,7 @@ import {OnShelfComponent} from './onshelf.component';
 import {CirculatingComponent} from './circulating.component';
 import {BarcodesModule} from '@eg/staff/share/barcodes/barcodes.module';
 import {HoldsModule} from '@eg/staff/share/holds/holds.module';
+import {CircModule} from '@eg/staff/share/circ/circ.module';
 
 @NgModule({
     declarations: [
@@ -22,7 +23,8 @@ import {HoldsModule} from '@eg/staff/share/holds/holds.module';
     imports: [
         StaffCommonModule,
         ILLRoutingModule,
-        HoldsModule
+        HoldsModule,
+        CircModule,
     ],
     providers: []
 })

@@ -1,0 +1,34 @@
+
+
+<ul ngbNav #holdsNav="ngbNav" class="nav-tabs"
+    [activeId]="ill_role" [keyboard]="true" (navChange)="beforeTabChange($event)"
+    [roles]="false" role="tablist">
+
+  <li role="presentation" ngbNavItem="borrower">
+    <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)" i18n>For My Patrons</a>
+    <ng-template ngbNavContent>
+      <eg-circ-grid #toMyPatrons
+        persistKey="ff.ill.circulating.borrower"
+        (reloadRequested)="loadHere()"
+        sortField="due_date"
+        showFields="circ.id,copy.barcode,copy.circ_lib,circ.usr.fist_given_name,circ.xact_start,dueDate,circ.circ_lib,title"
+      />
+    </ng-template>
+  </li>
+
+  <li role="presentation" ngbNavItem="lender">
+    <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)" i18n>At Other Libraries</a>
+    <ng-template ngbNavContent>
+      <eg-circ-grid #toOtherLibraries
+        persistKey="ff.ill.circulating.lender"
+        (reloadRequested)="loadThere()"
+        sortField="due_date"
+        showFields="circ.id,copy.barcode,copy.circ_lib,circ.usr.fist_given_name,circ.xact_start,dueDate,circ.circ_lib,title"
+      />
+    </ng-template>
+  </li>
+</ul>
+
+<ng-container>
+  <div [ngbNavOutlet]="holdsNav"></div>
+</ng-container>
