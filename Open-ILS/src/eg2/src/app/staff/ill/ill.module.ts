@@ -10,6 +10,7 @@ import {CirculatingComponent} from './circulating.component';
 import {BarcodesModule} from '@eg/staff/share/barcodes/barcodes.module';
 import {HoldsModule} from '@eg/staff/share/holds/holds.module';
 import {CircModule} from '@eg/staff/share/circ/circ.module';
+import {AdminPageModule} from '@eg/staff/share/admin-page/admin-page.module';
 
 @NgModule({
     declarations: [
@@ -25,6 +26,7 @@ import {CircModule} from '@eg/staff/share/circ/circ.module';
         ILLRoutingModule,
         HoldsModule,
         CircModule,
+        AdminPageModule,
     ],
     providers: []
 })
