@@ -1,0 +1,68 @@
+<ng-template #itemBarcodeTmpl  let-row="row">
+  <a routerLink="/staff/ill/singlescan/{{row.target_copy().barcode()}}">
+    {{row.target_copy().barcode()}}
+  </a>
+</ng-template>
+
+<ng-template #copyLibTmpl  let-row="row">
+  <span>{{row.target_copy().circ_lib().shortname()}}</span>
+</ng-template>
+
+<ng-template #routingCodeTmpl  let-row="row">
+  <span>{{row.dest().routing_code()}}</span>
+</ng-template>
+
+<ng-template #titleTmpl  let-row="row">
+  <a routerLink="/staff/catalog/record/{{row.target_copy().call_number().record().id()}}">
+    {{row.target_copy().call_number().record().wide_display_entry().title()}}
+  </a>
+</ng-template>
+
+<ul ngbNav #transitNav="ngbNav" class="nav-tabs"
+    [activeId]="ill_role" [keyboard]="true" (navChange)="beforeTabChange($event)"
+    [roles]="false" role="tablist">
+
+  <li role="presentation" ngbNavItem="borrower">
+    <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)">{{linkLabels.borrower}}</a>
+    <ng-template ngbNavContent>
+      <eg-admin-page idlClass="atc"
+        persistKey="ff.ill.{{direction}}_transit.borrower"
+        sortField="source_send_time"
+        fieldOrder="source_send_time,source"
+        hideGridFields="id,target_copy,cancel_time,dest_recv_time,prev_hop,copy_status,persistant_transfer,prev_dest"
+        [disableOrgFilter]="true"
+        [disableDelete]="true"
+        [disableEdit]="true"
+        [disableCreate]="true"
+        [hideApplyTranslations]="true"
+        [baseFilter]="liveFilters.borrower"
+        [baseFlesh]="{depth: 4, fields:{atc:['target_copy','source','dest'],acp:['call_number'],acn:['record'],bre:['wide_display_entry']}}"
+        [templateFields]="[{name: 'Routing Code', template: routingCodeTmpl},{name: 'Item Barcode', template: itemBarcodeTmpl},{name: 'Copy Library', template: copyLibTmpl},{name: 'Title', template: titleTmpl}]"
+      />
+    </ng-template>
+  </li>
+
+  <li role="presentation" ngbNavItem="lender">
+    <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)">{{linkLabels.lender}}</a>
+    <ng-template ngbNavContent>
+      <eg-admin-page idlClass="atc"
+        persistKey="ff.ill.{{direction}}_transit.lender"
+        sortField="source_send_time"
+        fieldOrder="source_send_time,source"
+        hideGridFields="id,target_copy,cancel_time,dest_recv_time,prev_hop,copy_status,persistant_transfer,prev_dest"
+        [disableOrgFilter]="true"
+        [disableDelete]="true"
+        [disableEdit]="true"
+        [disableCreate]="true"
+        [hideApplyTranslations]="true"
+        [baseFilter]="liveFilters.lender"
+        [baseFlesh]="{depth: 4, fields:{atc:['target_copy','source','dest'],acp:['call_number'],acn:['record'],bre:['wide_display_entry']}}"
+        [templateFields]="[{name: 'Routing Code', template: routingCodeTmpl},{name: 'Item Barcode', template: itemBarcodeTmpl},{name: 'Title', template: titleTmpl}]"
+      />
+    </ng-template>
+  </li>
+</ul>
+
+<ng-container>
+  <div [ngbNavOutlet]="transitNav"></div>
+</ng-container>

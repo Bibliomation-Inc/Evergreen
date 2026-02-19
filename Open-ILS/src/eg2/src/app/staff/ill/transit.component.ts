@@ -1,23 +1,115 @@
 import {Component, OnInit, Input} from '@angular/core';
 import {Router, ActivatedRoute, ParamMap} from '@angular/router';
+import {Location} from '@angular/common';
 import {OrgService} from '@eg/core/org.service';
 import {NetService} from '@eg/core/net.service';
 import {StoreService} from '@eg/core/store.service';
+import {NgbNav, NgbNavChangeEvent} from '@ng-bootstrap/ng-bootstrap';
+import {AdminPageComponent} from '@eg/staff/share/admin-page/admin-page.component';
 
 @Component({
     templateUrl: 'transit.component.html',
     selector: 'ff-transits'
 })
-export class TransitComponent {
+export class TransitComponent implements OnInit {
+
+    @Input() direction: string;
+    @Input() ill_role: string;
+    @Input() contextOrg: number;
+
+    liveFilters = { borrower: null, lender: null };
+    linkLabels = { borrower: null, lender: null };
 
     constructor(
         private router: Router,
+        private ngLocation: Location,
         private org: OrgService,
         private net: NetService,
         private store: StoreService
     ) {}
 
+    ngOnInit() {
+        const fullPath = this.org.fullPath(this.contextOrg, true);
+        let dest: any = [...fullPath];      // inbound transits
+        let circ_lib: any = [...fullPath];  // our copies
+        let source: any = [...fullPath];    // source of transit
+
+        if (this.direction === 'incoming') {
+            this.linkLabels.borrower = $localize`ILLs For My Patrons`;
+            this.linkLabels.lender = $localize`My Returns`;
+
+            source = {'not in' : source};
+        } else {
+            this.linkLabels.borrower = $localize`ILLs to Other Libraries`;
+            this.linkLabels.lender = $localize`Returns to Other Libraries`;
+
+            dest = {'not in' : dest};
+        }
+
+        this.liveFilters.borrower = {
+            dest_recv_time : null,
+            cancel_time : null,
+            dest : dest,
+            source : source,
+            target_copy : {
+                'in' : {
+                    select: {acp : ['id']},
+                    from : 'acp',
+                    where : {
+                        deleted : 'f',
+                        id : {'=' : {'+atc' : 'target_copy'}},
+                        circ_lib : {'not in' : circ_lib}
+                    }
+                }
+            }
+        };
+
+        this.liveFilters.lender = {
+            dest_recv_time : null,
+            cancel_time : null,
+            dest : dest,
+            source : source,
+            target_copy : {
+                'in' : {
+                    select: {acp : ['id']},
+                    from : 'acp',
+                    where : {
+                        deleted : 'f',
+                        id : {'=' : {'+atc' : 'target_copy'}},
+                        circ_lib : circ_lib
+                    }
+                }
+            }
+        };
+    }
+
     newHold() {
         this.router.navigate(['/staff/catalog/search']);
+    }
+
+    // Navigate, opening new tabs when requested via control-click.
+    // NOTE: The nav items have routerLinks, but for some reason,
+    // control-click on the links does not open them in a new tab.
+    // Mouse middle-click does, though.  *shrug*
+    navItemClick(tab: string, evt: PointerEvent) {
+        evt.preventDefault();
+        this.routeToTab(tab, evt.ctrlKey);
+    }
+
+    beforeTabChange(evt: NgbNavChangeEvent) {
+        // Prevent the nav component from changing tabs so we can
+        // control the behaviour.
+        evt.preventDefault();
+    }
+
+    routeToTab(tab?: string, newWindow?: boolean) {
+        let url = `/staff/ill/${this.direction}/${tab}`;
+
+        if (newWindow) {
+            url = this.ngLocation.prepareExternalUrl(url);
+            window.open(url);
+        } else {
+            this.router.navigate([url]);
+        }
     }
 }
