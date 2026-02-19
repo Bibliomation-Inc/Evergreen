@@ -85,8 +85,9 @@ export class AdminPageComponent implements OnInit {
     // Optional: Replace the default deletion confirmation text with this
     @Input() deleteConfirmation: string;
 
-    // Remove the ability to edit rows
+    // Remove the ability to edit or createrows
     @Input() disableEdit: boolean;
+    @Input() disableCreate: boolean;
 
     // Include objects linking to org units which are ancestors
     // of the selected org unit.
@@ -137,6 +138,8 @@ export class AdminPageComponent implements OnInit {
 
     // Add default filters to the grid
     @Input() initialFilterValues: {[field: string]: string};
+    @Input() baseFilter: any;
+    @Input() baseFlesh: any;
 
     // Override default values for fm-editor
     @Input() defaultNewRecord: IdlObject;
@@ -363,16 +366,22 @@ export class AdminPageComponent implements OnInit {
             const searchOps = {
                 offset: pager.offset,
                 limit: pager.limit,
-                order_by: orderBy
+                order_by: orderBy,
+                flesh: this.baseFlesh?.depth,
+                flesh_fields: this.baseFlesh?.fields
             };
 
-            if (!this.contextOrg && !this.gridFilters && !Object.keys(this.dataSource.filters).length) {
+            if (!this.contextOrg
+                && !this.gridFilters
+                && !Object.keys(this.dataSource.filters).length
+                && !(this.baseFilter && Object.keys(this.baseFilter).length)
+            ) {
                 // No org filter -- fetch all rows
                 return this.pcrud.retrieveAll(
                     this.idlClass, searchOps, {fleshSelectors: true});
             }
 
-            const search: any[] = new Array();
+            let search: any = new Array();
             const orgFilters: any[] = [];
 
             if (this.orgField && (this.searchOrgs || this.contextOrg)) {
@@ -406,6 +415,14 @@ export class AdminPageComponent implements OnInit {
                     urlProvidedFilters[key] = this.gridFilters[key];
                     search.push(urlProvidedFilters);
                 });
+            }
+
+            if (this.baseFilter && Object.keys(this.baseFilter).length) {
+                if (search.length) {
+                    search = { '-and': [ this.baseFilter, search ] };
+                } else {
+                    search = this.baseFilter;
+                }
             }
 
             return this.pcrud.search(
