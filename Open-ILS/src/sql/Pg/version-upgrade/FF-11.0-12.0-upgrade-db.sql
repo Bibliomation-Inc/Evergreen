@@ -13200,7 +13200,7 @@ SELECT evergreen.upgrade_deps_block_check('1477', :eg_version);
 
 ALTER TABLE config.hold_matrix_matchpoint ADD COLUMN copy_location INT REFERENCES asset.copy_location (id) DEFERRABLE INITIALLY DEFERRED;
 
-DROP INDEX config.chmm_once_per_paramset;
+DROP INDEX IF EXISTS config.chmm_once_per_paramset;
 
 CREATE UNIQUE INDEX chmm_once_per_paramset ON config.hold_matrix_matchpoint (COALESCE(user_home_ou::TEXT, ''), COALESCE(request_ou::TEXT, ''), COALESCE(pickup_ou::TEXT, ''), COALESCE(item_owning_ou::TEXT, ''), COALESCE(item_circ_ou::TEXT, ''), COALESCE(usr_grp::TEXT, ''), COALESCE(requestor_grp::TEXT, ''), COALESCE(circ_modifier, ''), COALESCE(copy_location::TEXT, ''), COALESCE(marc_type, ''), COALESCE(marc_form, ''), COALESCE(marc_bib_level, ''), COALESCE(marc_vr_format, ''), COALESCE(juvenile_flag::TEXT, ''), COALESCE(ref_flag::TEXT, ''), COALESCE(item_age, '0 seconds')) WHERE active;
 
