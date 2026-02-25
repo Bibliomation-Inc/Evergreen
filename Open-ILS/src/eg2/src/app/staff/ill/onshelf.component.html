@@ -7,8 +7,9 @@
   <li role="presentation" ngbNavItem="borrower">
     <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)" i18n>For My Patrons</a>
     <ng-template ngbNavContent>
-      <eg-holds-grid 
+      <eg-holds-grid pageSize="25"
         persistKey="ff.ill.onshelf.borrower"
+        [illMode]="true"
         [noLoadProgress]="true"
         [hideHoldsCount]="false"
         [enablePreFetch]="true"
@@ -25,8 +26,9 @@
   <li role="presentation" ngbNavItem="lender">
     <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)" i18n>At Other Libraries</a>
     <ng-template ngbNavContent>
-      <eg-holds-grid 
+      <eg-holds-grid pageSize="25"
         persistKey="ff.ill.onshelf.lender"
+        [illMode]="true"
         [noLoadProgress]="true"
         [hideHoldsCount]="false"
         [hidePrintPullList]="true"

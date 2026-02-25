@@ -6,11 +6,14 @@ import {SingleScanComponent} from './singlescan.component';
 import {PendingRequestsComponent} from './pending.component';
 import {TransitComponent} from './transit.component';
 import {OnShelfComponent} from './onshelf.component';
+import {DisallowItemComponent} from './disallow-item.component';
+import {ILLService} from './ill.service';
 import {CirculatingComponent} from './circulating.component';
 import {BarcodesModule} from '@eg/staff/share/barcodes/barcodes.module';
 import {HoldsModule} from '@eg/staff/share/holds/holds.module';
 import {CircModule} from '@eg/staff/share/circ/circ.module';
 import {AdminPageModule} from '@eg/staff/share/admin-page/admin-page.module';
+import {PatronModule} from '@eg/staff/share/patron/patron.module';
 
 @NgModule({
     declarations: [
@@ -19,7 +22,8 @@ import {AdminPageModule} from '@eg/staff/share/admin-page/admin-page.module';
         PendingRequestsComponent,
         TransitComponent,
         OnShelfComponent,
-        CirculatingComponent
+        CirculatingComponent,
+        DisallowItemComponent,
     ],
     imports: [
         StaffCommonModule,
@@ -27,8 +31,11 @@ import {AdminPageModule} from '@eg/staff/share/admin-page/admin-page.module';
         HoldsModule,
         CircModule,
         AdminPageModule,
+        PatronModule,
     ],
-    providers: []
+    providers: [
+        ILLService,
+    ]
 })
 
 export class ILLModule {}

@@ -7,7 +7,7 @@
   <li role="presentation" ngbNavItem="borrower">
     <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)" i18n>For My Patrons</a>
     <ng-template ngbNavContent>
-      <eg-circ-grid #toMyPatrons
+      <eg-circ-grid #toMyPatrons pageSize="25"
         persistKey="ff.ill.circulating.borrower"
         (reloadRequested)="loadHere()"
         sortField="due_date"
@@ -19,7 +19,7 @@
   <li role="presentation" ngbNavItem="lender">
     <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)" i18n>At Other Libraries</a>
     <ng-template ngbNavContent>
-      <eg-circ-grid #toOtherLibraries
+      <eg-circ-grid #toOtherLibraries pageSize="25"
         persistKey="ff.ill.circulating.lender"
         (reloadRequested)="loadThere()"
         sortField="due_date"
