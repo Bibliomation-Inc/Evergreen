@@ -6,6 +6,7 @@ import {HoldsGridComponent} from './grid.component';
 import {HoldDetailComponent} from './detail.component';
 import {HoldManageComponent} from './manage.component';
 import {HoldRetargetDialogComponent} from './retarget-dialog.component';
+import {HoldCaptureDialogComponent} from './capture-dialog.component';
 import {HoldTransferDialogComponent} from './transfer-dialog.component';
 import {HoldTransferViaBibsDialogComponent} from './transfer-via-bibs-dialog.component';
 import {HoldCancelDialogComponent} from './cancel-dialog.component';
@@ -21,6 +22,7 @@ import {WorkLogModule} from '@eg/staff/share/worklog/worklog.module';
         HoldDetailComponent,
         HoldManageComponent,
         HoldRetargetDialogComponent,
+        HoldCaptureDialogComponent,
         HoldTransferDialogComponent,
         HoldTransferViaBibsDialogComponent,
         HoldCancelDialogComponent,
@@ -39,6 +41,7 @@ import {WorkLogModule} from '@eg/staff/share/worklog/worklog.module';
         HoldDetailComponent,
         HoldManageComponent,
         HoldRetargetDialogComponent,
+        HoldCaptureDialogComponent,
         HoldTransferDialogComponent,
         HoldTransferViaBibsDialogComponent,
         HoldCancelDialogComponent,
