@@ -11,14 +11,11 @@ import {GridDataSource, GridCellTextGenerator} from '@eg/share/grid/grid';
 import {GridComponent} from '@eg/share/grid/grid.component';
 import {ProgressDialogComponent} from '@eg/share/dialog/progress.component';
 import {ConfirmDialogComponent} from '@eg/share/dialog/confirm.component';
-import {MarkDamagedDialogComponent
-} from '@eg/staff/share/holdings/mark-damaged-dialog.component';
-import {MarkMissingDialogComponent
-} from '@eg/staff/share/holdings/mark-missing-dialog.component';
-import {MarkDiscardDialogComponent
-} from '@eg/staff/share/holdings/mark-discard-dialog.component';
-import {HoldRetargetDialogComponent
-} from '@eg/staff/share/holds/retarget-dialog.component';
+import {MarkDamagedDialogComponent} from '@eg/staff/share/holdings/mark-damaged-dialog.component';
+import {MarkMissingDialogComponent} from '@eg/staff/share/holdings/mark-missing-dialog.component';
+import {MarkDiscardDialogComponent} from '@eg/staff/share/holdings/mark-discard-dialog.component';
+import {HoldRetargetDialogComponent} from '@eg/staff/share/holds/retarget-dialog.component';
+import {HoldCaptureDialogComponent} from '@eg/staff/share/holds/capture-dialog.component';
 import {HoldTransferDialogComponent} from './transfer-dialog.component';
 import {HoldCancelDialogComponent} from './cancel-dialog.component';
 import {HoldManageDialogComponent} from './manage-dialog.component';
@@ -37,6 +34,11 @@ import deepEqual from 'deep-equal';
     styles: ['.input-group > .form-control { width: auto; flex-grow: 0; }']
 })
 export class HoldsGridComponent implements OnInit {
+
+    @Input() pageSize: number = null;
+
+    // link to singlescan in ILL mode
+    @Input() illMode = false;
 
     // Hide the "Holds Count" header
     @Input() hideHoldsCount = false;
@@ -93,6 +95,16 @@ export class HoldsGridComponent implements OnInit {
 
     @Input() currentShelfLib: any;
 
+    @Input() showCaptureAction = false;
+
+    // Additional action menu options, added at the top of the menu or group
+    // [{ label: string, method: function(any[]), group: string }, ...]
+    @Input() customActions: any[];
+
+    // Additional toolbar buttons, added at the end of the toolbar
+    // [{ label: string, method: function(any[]) }, ...]
+    @Input() customButtons: any[];
+
     mode: 'list' | 'detail' | 'manage' = 'list';
     initDone = false;
     holdsCount: number;
@@ -118,6 +130,8 @@ export class HoldsGridComponent implements OnInit {
     private markMissingDialog: MarkMissingDialogComponent;
     @ViewChild('markDiscardDialog')
     private markDiscardDialog: MarkDiscardDialogComponent;
+    @ViewChild('captureDialog', { static: true })
+    private captureDialog: HoldCaptureDialogComponent;
     @ViewChild('retargetDialog', { static: true })
     private retargetDialog: HoldRetargetDialogComponent;
     @ViewChild('cancelDialog', { static: true })
@@ -315,6 +329,12 @@ export class HoldsGridComponent implements OnInit {
                 }
             });
         }
+    }
+
+    customMethodCallback(method, rows) {
+        method(rows);
+        this._prev_rows = [];
+        this.holdsGrid.reload();
     }
 
     // Returns true after all data/settings/etc required to render the
@@ -785,6 +805,21 @@ export class HoldsGridComponent implements OnInit {
         }
     }
 
+
+    showCaptureDialog(rows: any[]) {
+        const copyIds = rows.map(r => r.target_copy).filter(id => Boolean(id));
+        if (copyIds.length > 0) {
+            this.captureDialog.copyIds = copyIds;
+            this.captureDialog.open({}).subscribe(
+                rowsModified => {
+                    if (rowsModified) {
+                        this._prev_rows = [];
+                        this.holdsGrid.reload();
+                    }
+                }
+            );
+        }
+    }
 
     showRetargetDialog(rows: any[]) {
         const holdIds = rows.map(r => r.id).filter(id => Boolean(id));

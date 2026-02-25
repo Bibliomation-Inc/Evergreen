@@ -7,6 +7,7 @@
 <eg-mark-missing-dialog #markMissingDialog></eg-mark-missing-dialog>
 <eg-mark-discard-dialog #markDiscardDialog></eg-mark-discard-dialog>
 <eg-hold-retarget-dialog #retargetDialog></eg-hold-retarget-dialog>
+<eg-hold-capture-dialog #captureDialog></eg-hold-capture-dialog>
 <eg-hold-cancel-dialog #cancelDialog></eg-hold-cancel-dialog>
 <eg-hold-manage-dialog #manageDialog></eg-hold-manage-dialog>
 <eg-confirm-dialog #uncancelDialog
@@ -137,7 +138,7 @@
 
     <eg-grid #holdsGrid [dataSource]="gridDataSource" [sortable]="true"
       [useLocalSort]="enablePreFetch" [cellTextGenerator]="cellTextGenerator"
-      [showFields]="showFields"
+      [showFields]="showFields" [pageSize]="pageSize"
       [multiSortable]="true" [persistKey]="persistKey"
       (onRowActivate)="showDetail($event)">
 
@@ -156,12 +157,25 @@
         </eg-grid-toolbar-button>
       </ng-container>
 
+      <ng-container *ngFor="let cb of customButtons">
+        <eg-grid-toolbar-button label="{{cb.label}}"
+          (onClick)="customMethodCallback(cb.method, $event)">
+        </eg-grid-toolbar-button>
+      </ng-container>
+
+      <ng-container *ngFor="let ca of customActions">
+        <eg-grid-toolbar-action label="{{ca.label}}"
+          [group]="ca.group"
+          (onClick)="customMethodCallback(ca.method, $event)">
+        </eg-grid-toolbar-action>
+      </ng-container>
+
       <eg-grid-toolbar-action
-        i18n-label label="Show Hold Details" i18n-group group="Hold"
+        i18n-label label="Show Hold Details" i18n-group group="ILL"
         (onClick)="showDetails($event)"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action
-        i18n-label label="Modify Hold(s)" group="Hold" i18n-group
+        i18n-label label="Modify Hold(s)" group="ILL" i18n-group
         (onClick)="showManageDialog($event)">
       </eg-grid-toolbar-action>
 
@@ -175,7 +189,7 @@
       </eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action
-        i18n-group group="Hold" i18n-label label="Transfer To Marked Title"
+        i18n-group group="ILL" i18n-label label="Transfer To Marked Title"
         [disableOnRows]="nonTitleHoldsSelected"
         (onClick)="showTransferDialog($event)">
       </eg-grid-toolbar-action>
@@ -195,20 +209,24 @@
       </eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action
-        i18n-group group="Hold" i18n-label label="Find Another Target"
+        i18n-group group="ILL" i18n-label label="Capture Item" *ngIf="showCaptureAction"
+        (onClick)="showCaptureDialog($event)"></eg-grid-toolbar-action>
+
+      <eg-grid-toolbar-action
+        i18n-group group="ILL" i18n-label label="Find Another Target"
         (onClick)="showRetargetDialog($event)"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action *ngIf="!showRecentlyCanceled"
-        i18-group group="Hold" i18n-label label="Cancel Hold"
+        i18-group group="ILL" i18n-label label="Cancel Hold"
         (onClick)="showCancelDialog($event)"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action *ngIf="showRecentlyCanceled"
-        i18n-label label="Un-Cancel Hold(s)" group="Hold" i18n-group
+        i18n-label label="Un-Cancel Hold(s)" group="ILL" i18n-group
         (onClick)="showUncancelDialog($event)">
       </eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action
-        i18-group group="Hold" i18n-label label="Print ILLs"
+        i18-group group="ILL" i18n-label label="Print ILLs"
         (onClick)="printHolds()"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action *ngIf="hopeless"
@@ -230,8 +248,16 @@
         (onClick)="showHoldsForTitle($event)"></eg-grid-toolbar-action>
 
       <ng-template #barcodeTmpl let-hold="row" let-col="col">
-        <a *ngIf="hold.cp_barcode" href="/eg/staff/cat/item/{{hold.cp_id}}/summary" target="_blank">
-          <ng-container *ngIf="col.name === 'current_item' && hold.current_copy">
+        <a *ngIf="!illMode && hold.cp_barcode" href="/eg/staff/cat/item/{{hold.cp_id}}/summary" target="_blank">
+          <ng-container *ngIf="col.name === 'current_item'">
+            {{hold.cp_barcode}}
+          </ng-container>
+          <ng-container *ngIf="col.name === 'requested_item' && isCopyHold(hold)">
+            {{hold.cp_barcode}}
+          </ng-container>
+        </a>
+        <a *ngIf="illMode && hold.cp_barcode" routerLink="/staff/ill/singlescan/{{hold.cp_barcode}}">
+          <ng-container *ngIf="col.name === 'current_item'">
             {{hold.cp_barcode}}
           </ng-container>
           <ng-container *ngIf="col.name === 'requested_item' && isCopyHold(hold)">
