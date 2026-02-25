@@ -1,0 +1,193 @@
+<ff-disallow-item #disallowDialog/>
+
+<div class="row mb-3 pb-3 border-bottom">
+  <div class="row form-inline">
+    <div class="col-lg-4 d-flex">
+      <div class="input-group">
+        <span class="input-group-text" i18n>Barcode</span>
+        <input type="text" class="form-control" id="sstsBarcodeInput"
+          placeholder="Barcode..." i18n-placeholder [(ngModel)]="barcode" (focus)="$event.target.select()"
+          i18n-aria-label aria-label="Barcode Input" (keydown.enter)="takeBarcode()" />
+        <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+          (keydown.enter)="takeBarcode()" (click)="takeBarcode()" i18n>Go!</button>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div *ngIf="mode != 'status'" class="col-lg-4 d-flex">
+     <div class="input-group" *ngIf="getDispositionDetails().next_action_step">
+       <span class="input-group-text" i18n>Next Action</span>
+       <button type="button" id="sstsNextActionButton"
+         class="btn btn-outline-dark" [disabled]="action_pending"
+         (keydown.enter)="takeAction(dispositionDetails.next_action_step)"
+         (click)="takeAction(dispositionDetails.next_action_step)"
+       >{{dispositionDetails.next_action_label}}</button>
+     </div>
+    </div>
+    <div class="col-lg-8">
+     <div class="float-end btn-group">
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="popup_block_ill()"
+         *ngIf="dispositionDetails?.mine && (disposition && !disposition?.blocked)"
+         i18n>Disallow item for requests</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="unblock_all()"
+         *ngIf="dispositionDetails?.mine && disposition?.blocked"
+         i18n>Allow for requests</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="mark_lost()"
+         *ngIf="dispositionDetails?.can_mark_lost"
+         i18n>Mark Lost</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="abort_transit()"
+         *ngIf="dispositionDetails?.open_transit"
+         i18n>Abort Transit</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="cancel()"
+         *ngIf="dispositionDetails?.can_cancel_hold"
+         i18n>Cancel Request</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="checkout()"
+         *ngIf="dispositionDetails?.needs_checkout"
+         i18n>Check Out</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="checkin()"
+         *ngIf="dispositionDetails?.needs_checkin"
+         i18n>Check In</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="checkin()"
+         *ngIf="dispositionDetails?.needs_receive"
+         i18n>Receive Item</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="retarget()"
+         *ngIf="dispositionDetails?.can_retarget_hold"
+         i18n>Retarget Request</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         (click)="checkin()"
+         *ngIf="dispositionDetails?.needs_capture"
+         i18n>Capture Item</button>
+       <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
+         *ngIf="disposition"
+         (click)="print_details()"
+         i18n>Print Details</button>
+     </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-3 pb-3 border-bottom" *ngIf="disposition">
+  <div class="col-lg-6">
+    <table class="table table-striped table-hover">
+      <thead>
+        <th class="pb-3" i18n>Item Details</th>
+        <th class="pb-3">
+          <span *ngIf="notFound"
+            class="label label-danger" i18n>Item Not Found</span>
+        </th>
+      </thead>
+      <tbody>
+        <tr><td i18n>Barcode:</td><td>{{disposition.copy.barcode()}}</td></tr>
+        <tr>
+          <td i18n>Status:</td>
+          <td>
+            <span
+              ngClass="{label : disposition.copy.status().holdable() =='f', 'label-warning' : disposition.copy.status().holdable() =='f'}">
+              {{disposition.copy.status().name()}}
+            </span>
+          </td>
+        </tr>
+        <tr><td i18n>Owning Lib:</td><td>{{disposition.copy.circ_lib().shortname()}}</td></tr>
+        <tr>
+          <td i18n>Title:</td>
+          <td>
+            <a i18n *ngIf="disposition.copy.source_lib()" target="_blank"
+              routerLink="/staff/catalog/record/{{disposition.copy.call_number().record().id()}}">
+              {{disposition.wideDisplayFields.title()}}
+            </a>
+          </td>
+        </tr>
+        <tr><td i18n>Author:</td><td>{{disposition.wideDisplayFields.author()}}</td></tr>
+        <tr><td i18n>Call Number:</td><td>{{disposition.copy.call_number().label()}}</td></tr>
+        <tr><td i18n>FulfILLment Bib ID:</td><td>{{disposition.copy.call_number().record().id()}}</td></tr>
+        <tr><td i18n>Remote ILS Bib ID:</td><td>{{disposition.copy.call_number().record().remote_id()}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-lg-6">
+    <table class="table table-striped table-hover" *ngIf="disposition.circ || disposition.hold || disposition.transit">
+      <thead>
+        <th class="pb-3" colspan="2" i18n>Transaction Details</th>
+      </thead>
+      <tbody>
+        <tr *ngIf='disposition.circ'><td i18n>Circulating Library:</td><td>{{disposition.circ?.circ_lib().shortname()}}</td></tr>
+        <tr *ngIf='disposition.circ'><td i18n>Circulating Patron:</td><td>{{formatPatronName(disposition.circ.usr())}}</td></tr>
+        <tr *ngIf='disposition.circ'><td i18n>Patron Barcode:</td><td>{{disposition.circ.usr().card().barcode()}}</td></tr>
+        <tr *ngIf='disposition.circ'><td i18n>Checkout date:</td><td>{{disposition.circ.xact_start() | date:'shortDate'}}</td></tr>
+        <tr *ngIf='disposition.circ'><td i18n>Due Date:</td><td>{{disposition.circ.due_date() | date:'shortDate'}}</td></tr>
+        <tr *ngIf='disposition.circ?.stop_fines()'><td i18n>Circ Status:</td>
+          <td><span class="label label-warning">{{disposition.circ.stop_fines()}}</span></td>
+        </tr>
+        <tr *ngIf='disposition.hold'><td i18n>Requesting Patron:</td><td>{{formatPatronName(disposition.hold.usr())}}</td></tr>
+        <tr *ngIf='disposition.hold'><td i18n>Patron Barcode:</td><td>{{disposition.hold.usr().card().barcode()}}</td></tr>
+        <tr *ngIf='disposition.hold'><td i18n>Requesting Library:</td><td>{{disposition.hold.request_lib().shortname()}}</td></tr>
+        <tr *ngIf='disposition.hold'><td i18n>Pickup Library:</td><td>{{disposition.hold.pickup_lib().shortname()}}</td></tr>
+        <tr *ngIf='disposition.hold'><td i18n>Request Date:</td><td>{{disposition.hold.request_time() | date:'shortDate'}}</td></tr>
+        <tr *ngIf='disposition.hold'><td i18n>Capture Date:</td><td>{{disposition.hold.capture_time() | date:'shortDate'}}</td></tr>
+        <tr *ngIf='disposition.hold?.cancel_time()'>
+            <td i18n>ILL Cancel Date:</td>
+            <td><span class="label label-warning">{{disposition.hold.cancel_time() | date:'shortDate'}}</span></td>
+        </tr>
+        <tr *ngIf='disposition.hold?.cancel_cause()'>
+            <td i18n>ILL Cancel Reason:</td>
+            <td><span class="label label-warning">{{disposition.hold.cancel_cause().label()}}</span></td>
+        </tr>
+        <tr *ngIf='disposition.hold?.shelf_time'>
+            <td i18n>ILL Shelf Date:</td>
+            <td>{{disposition.hold.shelf_time() | date:'shortDate'}}</td>
+        </tr>
+        <tr *ngIf='disposition.hold?.shelf_expire_time()'>
+            <td i18n>ILL Shelf Expire Time:</td>
+            <td>{{disposition.hold.shelf_expire_time | date:'shortDate'}}</td>
+        </tr>
+        <tr *ngIf='disposition.transit'><td i18n>Transit Source:</td><td>{{disposition.transit.source().shortname()}}</td></tr>
+        <tr *ngIf='disposition.transit'><td i18n>Transit Destination:</td><td>{{disposition.transit.dest().shortname()}}</td></tr>
+        <tr *ngIf='disposition.transit'><td i18n>Destination Routing Code:</td><td>{{disposition.transit.dest().routing_code()}}</td></tr>
+        <tr *ngIf='disposition.transit'><td i18n>Transit Send Date:</td><td>{{disposition.transit.source_send_time() | date:'shortDate'}}</td></tr>
+        <tr *ngIf='disposition.transit'><td i18n>Transit Receive Date:</td><td>{{disposition.transit.dest_recv_time() | date:'shortDate'}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row" *ngIf="disposition">
+  <div class="col-lg-6">
+    <table class="table table-striped table-hover" *ngIf="disposition.hold_blocks.length">
+      <thead>
+        <th colspan="4" i18n>ILL blocks for copy</th>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of disposition.hold_blocks">
+          <td title="{{b.block_time()}}">{{b.block_time() | date:'shortDate'}}</td>
+          <td>{{b.staff().usrname()}}</td>
+          <td>{{b.reason()}}</td>
+          <td *ngIf="b.hold()" i18n>One request ({{b.hold().id()}})</td>
+          <td *ngIf="!b.hold()" i18n>All requests</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-lg-6">
+    <table class="table table-striped table-hover" *ngIf="disposition.rejections.length">
+      <thead>
+        <th colspan="3" i18n>Capture Rejections</th>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of disposition.rejections">
+          <td>{{r.circ_lib().shortname()}}</td>
+          <td>{{r.current_copy().barcode()}}</td>
+          <td title="{{r.fail_time()}}">{{r.fail_time() | date:'shortDate'}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

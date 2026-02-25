@@ -13,7 +13,7 @@
 </ng-template>
 
 <ng-template #titleTmpl  let-row="row">
-  <a routerLink="/staff/catalog/record/{{row.target_copy().call_number().record().id()}}">
+  <a routerLink="/staff/catalog/record/{{row.target_copy().call_number().record().id()}}" target="_blank">
     {{row.target_copy().call_number().record().wide_display_entry().title()}}
   </a>
 </ng-template>
@@ -25,7 +25,7 @@
   <li role="presentation" ngbNavItem="borrower">
     <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)">{{linkLabels.borrower}}</a>
     <ng-template ngbNavContent>
-      <eg-admin-page idlClass="atc"
+      <eg-admin-page idlClass="atc" pageSize="25"
         persistKey="ff.ill.{{direction}}_transit.borrower"
         sortField="source_send_time"
         fieldOrder="source_send_time,source"
@@ -36,7 +36,7 @@
         [disableCreate]="true"
         [hideApplyTranslations]="true"
         [baseFilter]="liveFilters.borrower"
-        [baseFlesh]="{depth: 4, fields:{atc:['target_copy','source','dest'],acp:['call_number'],acn:['record'],bre:['wide_display_entry']}}"
+        [baseFlesh]="{depth: 4, fields:{atc:['target_copy','source','dest'],acp:['call_number','circ_lib'],acn:['record'],bre:['wide_display_entry']}, select: {bre : ['id']}}"
         [templateFields]="[{name: 'Routing Code', template: routingCodeTmpl},{name: 'Item Barcode', template: itemBarcodeTmpl},{name: 'Copy Library', template: copyLibTmpl},{name: 'Title', template: titleTmpl}]"
       />
     </ng-template>
@@ -45,7 +45,7 @@
   <li role="presentation" ngbNavItem="lender">
     <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)">{{linkLabels.lender}}</a>
     <ng-template ngbNavContent>
-      <eg-admin-page idlClass="atc"
+      <eg-admin-page idlClass="atc" pageSize="25"
         persistKey="ff.ill.{{direction}}_transit.lender"
         sortField="source_send_time"
         fieldOrder="source_send_time,source"
@@ -56,7 +56,7 @@
         [disableCreate]="true"
         [hideApplyTranslations]="true"
         [baseFilter]="liveFilters.lender"
-        [baseFlesh]="{depth: 4, fields:{atc:['target_copy','source','dest'],acp:['call_number'],acn:['record'],bre:['wide_display_entry']}}"
+        [baseFlesh]="{depth: 4, fields:{atc:['target_copy','source','dest'],acp:['call_number','circ_lib'],acn:['record'],bre:['wide_display_entry']}, select: {bre : ['id']}}"
         [templateFields]="[{name: 'Routing Code', template: routingCodeTmpl},{name: 'Item Barcode', template: itemBarcodeTmpl},{name: 'Title', template: titleTmpl}]"
       />
     </ng-template>

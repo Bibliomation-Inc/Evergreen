@@ -40,8 +40,8 @@ export class TransitComponent implements OnInit {
 
             source = {'not in' : source};
         } else {
-            this.linkLabels.borrower = $localize`ILLs to Other Libraries`;
-            this.linkLabels.lender = $localize`Returns to Other Libraries`;
+            this.linkLabels.lender = $localize`ILLs to Other Libraries`;
+            this.linkLabels.borrower = $localize`Returns to Other Libraries`;
 
             dest = {'not in' : dest};
         }
