@@ -441,6 +441,7 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
     takeBarcode(): Promise<any> {
         this.disposition = null;
         this.dispositionDetails = null;
+        this.barcode = this.barcode.trim();
         return this.ill.getTransactionDispositionByBarcode(this.barcode)
             .then(dispoList => {
                 console.debug("Barcode disposition:", dispoList);
