@@ -2386,8 +2386,7 @@ sub collect_copy_transactions {
                 flesh_fields => { 
                     acp => ['call_number', 'status'],
                     acn => ['record'],
-                    # flesh simple_record for now as a hack to display title/author
-                    bre => ['simple_record']
+                    bre => ['simple_record','owner'] # maybe use wide_display_entry
                 }
             }
         ])
