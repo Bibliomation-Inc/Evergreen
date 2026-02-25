@@ -2261,11 +2261,10 @@ __PACKAGE__->register_method(
     method    => 'copy_unblock_hold',
     api_name  => 'open-ils.circ.hold.unblock',
     signature => q/
-        Blocks a copy from filling one (or all, if hold is undef) hold(s)
+        Allows a currently globally-blocked copy to fill hold(s)
         @param authtoken The login session key
-        @param copy_id The copy id to block
-        @param hold_id The optional hold id to block
-        @return ID of the new object on success, Event on error
+        @param copy_id The copy id to unblock
+        @return ILSEvent on permission error, nothing on success
         /
 );
 
