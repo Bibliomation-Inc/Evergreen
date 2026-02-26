@@ -65,6 +65,9 @@ const CIRC_FLESH_FIELDS = {
 })
 export class CircGridComponent implements OnInit {
 
+    // link to singlescan in ILL mode
+    @Input() illMode = false;
+
     @Input() showFields: string;
     @Input() persistKey: string;
     @Input() printTemplate: string; // defaults to items_out
