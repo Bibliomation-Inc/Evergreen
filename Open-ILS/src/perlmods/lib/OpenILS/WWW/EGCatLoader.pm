@@ -409,7 +409,10 @@ sub load_common {
     $ctx->{home_page} = $ctx->{proto} . '://' . $ctx->{hostname} . $self->ctx->{opac_root} . "/home";
     $ctx->{logout_page} = ($ctx->{proto} eq 'http' ? 'https' : $ctx->{proto} ) . '://' . $ctx->{hostname} . $self->ctx->{opac_root} . "/logout";
 
-    if($e->authtoken($self->cgi->cookie(COOKIE_SES))) {
+    my $token = $self->cgi->cookie(COOKIE_SES) || $self->cgi->cookie(COOKIE_STAFF_TOKEN);
+    $token =~ s/"//g if ($token);
+
+    if($e->authtoken($token)) {
 
         if($e->checkauth) {
 
