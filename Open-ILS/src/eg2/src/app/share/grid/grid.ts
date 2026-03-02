@@ -141,6 +141,7 @@ export class GridColumnSet {
     isSortable: boolean;
     isFilterable: boolean;
     isMultiSortable: boolean;
+    defaultDatePlusTime = false;
     stockVisible: string[];
     idl: IdlService;
     defaultHiddenFields: string[];
@@ -375,6 +376,9 @@ export class GridColumnSet {
             }
         }
 
+        if (col.datePlusTime !== false && col.datePlusTime !== true) {
+            col.datePlusTime = this.defaultDatePlusTime;
+        }
         if (!col.name) { col.name = col.path; }
         if (!col.align) { col.align = ''; }
         if (!col.label) { col.label = col.name; }
@@ -724,6 +728,7 @@ export class GridContext {
     grid_density: string;
     gridDomId: string;
     resizeWrapper: boolean;
+    defaultDatePlusTime: boolean;
 
     // Allow calling code to know when the select-all-rows-in-page
     // action has occurred.
@@ -766,6 +771,7 @@ export class GridContext {
         this.columnSet.isMultiSortable = this.isMultiSortable === true;
         this.columnSet.defaultHiddenFields = this.defaultHiddenFields;
         this.columnSet.defaultVisibleFields = this.defaultVisibleFields;
+        this.columnSet.defaultDatePlusTime = this.defaultDatePlusTime;
         if (!this.pager.limit) {
             this.pager.limit = this.disablePaging ? MAX_ALL_ROW_COUNT : 10;
         }
