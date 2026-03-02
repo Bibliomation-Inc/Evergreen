@@ -10,15 +10,17 @@
       <eg-holds-grid pageSize="25"
         persistKey="ff.ill.pending.borrower"
         [illMode]="true"
+        [ill_role]="ill_role"
         [customActions]="customActions"
         [noLoadProgress]="true"
         [hideHoldsCount]="false"
         [enablePreFetch]="true"
+        [excludeCaptured]="true"
         [hidePickupLibFilter]="true"
         [hidePullListLibFilter]="true"
         [initialPickupLib]="contextOrg"
         [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
-        showFields="id,current_item,cl_shortname,request_time,expire_time,frozen,thaw_date,status_string,rl_shortname,pl_shortname,title"
+        showFields="id,current_item,cl_shortname,request_time,expire_time,frozen,thaw_date,title"
       />
     </ng-template>
   </li>
@@ -29,16 +31,18 @@
       <eg-holds-grid pageSize="25"
         persistKey="ff.ill.pending.lender"
         [illMode]="true"
+        [ill_role]="ill_role"
         [showCaptureAction]="true"
         [customActions]="customActions"
         [noLoadProgress]="true"
         [hideHoldsCount]="false"
         [enablePreFetch]="true"
+        [excludeCaptured]="true"
         [hidePickupLibFilter]="true"
         [hidePullListLibFilter]="true"
         [pullListOrg]="contextOrg"
         [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
-        showFields="id,current_item,cl_shortname,request_time,expire_time,frozen,thaw_date,status_string,rl_shortname,pl_shortname,title"
+        showFields="id,current_item,request_time,expire_time,frozen,thaw_date,pl_shortname,title"
       />
     </ng-template>
   </li>

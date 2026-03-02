@@ -15,7 +15,7 @@
         [enablePreFetch]="true"
         [hidePickupLibFilter]="true"
         [hidePullListLibFilter]="true"
-        [initialPickupLib]="contextOrg"
+        [copyCircLib]="{not:contextOrg}"
         [currentShelfLib]="contextOrg"
         [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
         showFields="id,current_item,cl_shortname,shelf_time,shelf_expire_time,usr_first_given_name,usr_family_name,ucard_barcode,title"
@@ -35,10 +35,10 @@
         [enablePreFetch]="true"
         [hidePickupLibFilter]="true"
         [hidePullListLibFilter]="true"
-        [pullListOrg]="contextOrg"
+        [copyCircLib]="contextOrg"
         [currentShelfLib]="{not:contextOrg}"
         [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
-        showFields="id,current_item,cl_shortname,shelf_time,shelf_expire_time,usr_first_given_name,usr_family_name,ucard_barcode,title"
+        showFields="id,current_item,cl_shortname,shelf_time,shelf_expire_time,csl_shortname,ucard_barcode,title"
       />
     </ng-template>
   </li>
