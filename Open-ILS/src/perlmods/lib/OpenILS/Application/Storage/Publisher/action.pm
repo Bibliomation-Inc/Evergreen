@@ -2304,6 +2304,7 @@ SELECT  h.id, h.request_time, h.capture_time, h.fulfillment_time, h.checkin_time
         sl.shortname AS sl_shortname,
         tl.shortname AS tl_shortname,
         ul.shortname AS ul_shortname,
+        csl.shortname AS csl_shortname,
 
         tr.id AS tr_id, tr.source_send_time AS tr_source_send_time, tr.dest_recv_time AS tr_dest_recv_time,
         tr.target_copy AS tr_target_copy, tr.source AS tr_source, tr.dest AS tr_dest, tr.prev_hop AS tr_prev_hop,
@@ -2473,6 +2474,7 @@ SELECT  h.id, h.request_time, h.capture_time, h.fulfillment_time, h.checkin_time
         LEFT JOIN serial.issuance siss ON (h.hold_type = 'I' AND siss.id = h.target)
         LEFT JOIN asset.copy cp ON (h.current_copy = cp.id OR (h.hold_type IN ('C','F','R') AND cp.id = h.target))
         LEFT JOIN actor.org_unit cl ON (cp.circ_lib = cl.id)
+        LEFT JOIN actor.org_unit csl ON (h.current_shelf_lib = csl.id)
         LEFT JOIN config.copy_status cs ON (cp.status = cs.id)
         LEFT JOIN asset.copy_location acpl ON (cp.location = acpl.id)
         LEFT JOIN asset.copy_location_order acplo ON (cp.location = acplo.location AND cp.circ_lib = acplo.org)
