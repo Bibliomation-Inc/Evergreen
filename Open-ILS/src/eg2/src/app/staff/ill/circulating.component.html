@@ -10,7 +10,7 @@
       <eg-circ-grid #toMyPatrons pageSize="25"
         persistKey="ff.ill.circulating.borrower"
         (reloadRequested)="loadHere()"
-        sortField="due_date" [illMode]="true"
+        sortField="due_date" [illMode]="true" [ill_role]="ill_role"
         showFields="circ.id,copy.barcode,copy.circ_lib,circ.usr.fist_given_name,circ.xact_start,dueDate,circ.circ_lib,title"
       />
     </ng-template>
@@ -22,7 +22,7 @@
       <eg-circ-grid #toOtherLibraries pageSize="25"
         persistKey="ff.ill.circulating.lender"
         (reloadRequested)="loadThere()"
-        sortField="due_date" [illMode]="true"
+        sortField="due_date" [illMode]="true" [ill_role]="ill_role"
         showFields="circ.id,copy.barcode,copy.circ_lib,circ.usr.fist_given_name,circ.xact_start,dueDate,circ.circ_lib,title"
       />
     </ng-template>
