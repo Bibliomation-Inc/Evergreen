@@ -35,6 +35,7 @@ import {OrgFamily} from '@eg/share/org-family-select/org-family-select.component
 export class AdminPageComponent implements OnInit {
 
     @Input() pageSize: number = null;
+    @Input() defaultDatePlusTime: boolean;
     @Input() idlClass: string;
 
     // Default sort field, used when no grid sorting is applied.

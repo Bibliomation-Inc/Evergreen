@@ -37,75 +37,75 @@
 <eg-grid #circGrid [dataSource]="gridDataSource" [sortable]="true"
   [rowFlairIsEnabled]="true" [rowFlairCallback]="rowFlair"
   [rowClassCallback]="rowClass" [persistKey]="persistKey"
+  [showFields]="showFields" [pageSize]="pageSize" [defaultDatePlusTime]="defaultDatePlusTime"
   [useLocalSort]="true" [cellTextGenerator]="cellTextGenerator">
-  [showFields]="showFields" [pageSize]="pageSize"
 
   <ng-container *ngIf="menuStyle === 'full'">
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-label label="Print Item Receipt(s)" (onClick)="printReceipts($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-group group="Add" i18n-label label="Add Item Alerts"
       (onClick)="openItemAlerts($event, 'create')">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-group group="Add" i18n-label label="Manage Item Alerts"
       (onClick)="openItemAlerts($event, 'manage')">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-group group="Add" i18n-label label="Add Billing"
       (onClick)="openBillingDialog($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode || ill_role=='borrower'"
       i18n-group group="Circulation" i18n-label label="Edit Due Date"
       (onClick)="editDueDate($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode || ill_role=='borrower'"
       group="Mark" i18n-group i18n-label label="Mark Item Damaged"
       (onClick)="markDamaged($event)"></eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       group="Mark" i18n-group i18n-label label="Mark Claims Returned"
       (onClick)="claimsReturned($event)"></eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       group="Mark" i18n-group i18n-label label="Mark Claims Never Checked Out"
       (onClick)="claimsNeverCheckedOut($event)"></eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode || ill_role=='borrower'"
       group="Mark" i18n-group i18n-label label="Mark Lost (By Patron)"
       (onClick)="markLost($event)"></eg-grid-toolbar-action>
 
     <!-- .subscribe() nudges the observable to run -->
-    <eg-grid-toolbar-action 
-      group="Circulation" i18n-group i18n-label label="Check In" 
+    <eg-grid-toolbar-action *ngIf="!illMode || ill_role=='borrower'"
+      group="Circulation" i18n-group i18n-label label="Check Item In" 
       (onClick)="checkin($event).subscribe()">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Circulation" i18n-group 
+    <eg-grid-toolbar-action group="Circulation" i18n-group *ngIf="!illMode"
       i18n-label label="Renew" (onClick)="renew($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Circulation" i18n-group 
+    <eg-grid-toolbar-action group="Circulation" i18n-group *ngIf="!illMode"
       i18n-label label="Renew All" (onClick)="renewAll()">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Circulation" i18n-group 
+    <eg-grid-toolbar-action group="Circulation" i18n-group *ngIf="!illMode"
       i18n-label label="Renew With Specific Due Date"
       (onClick)="renewWithDate($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Show" i18n-group 
+    <eg-grid-toolbar-action group="Show" i18n-group *ngIf="!illMode"
       i18n-label label="Show Last Few Circulation" (onClick)="showRecentCircs($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Show" i18n-group 
+    <eg-grid-toolbar-action group="Show" i18n-group *ngIf="!illMode"
       i18n-label label="Show Triggered Events" (onClick)="showTriggeredEvents($event)">
     </eg-grid-toolbar-action>
 
