@@ -67,6 +67,7 @@ export class CircGridComponent implements OnInit {
 
     // link to singlescan in ILL mode
     @Input() illMode = false;
+    @Input() ill_role: string = null;
 
     @Input() showFields: string;
     @Input() persistKey: string;
@@ -77,6 +78,7 @@ export class CircGridComponent implements OnInit {
 
     // Override default grid page size
     @Input() pageSize: number = null;
+    @Input() defaultDatePlusTime: boolean;
 
     // Emitted when a grid action modified data in a way that could
     // affect which cirulcations should appear in the grid.  Caller

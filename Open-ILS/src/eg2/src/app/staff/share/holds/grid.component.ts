@@ -36,9 +36,11 @@ import deepEqual from 'deep-equal';
 export class HoldsGridComponent implements OnInit {
 
     @Input() pageSize: number = null;
+    @Input() defaultDatePlusTime: boolean;
 
     // link to singlescan in ILL mode
     @Input() illMode = false;
+    @Input() ill_role: string = null;
 
     // Hide the "Holds Count" header
     @Input() hideHoldsCount = false;
@@ -94,6 +96,7 @@ export class HoldsGridComponent implements OnInit {
     @Input() patronFocused = false;
 
     @Input() currentShelfLib: any;
+    @Input() copyCircLib: any;
 
     @Input() showCaptureAction = false;
 
@@ -174,6 +177,9 @@ export class HoldsGridComponent implements OnInit {
 
     // If true, show recently canceled holds only.
     @Input() showRecentlyCanceled = false;
+
+    // If true, do NOT show captured holds
+    @Input() excludeCaptured = false;
 
     // Include holds fulfilled on or after hte provided date.
     // If no value is passed, fulfilled holds are not displayed.
@@ -441,6 +447,10 @@ export class HoldsGridComponent implements OnInit {
             filters['acpl.id'] = this.copyLocationIds;
         }
 
+        if (this.copyCircLib) {
+            filters['cp.circ_lib'] = this.copyCircLib;
+        }
+
         if (this.currentShelfLib) {
             filters['h.current_shelf_lib'] = this.currentShelfLib;
         }
@@ -514,12 +524,12 @@ export class HoldsGridComponent implements OnInit {
 
     fetchHolds(pager: Pager, sort: any[]): Observable<any> {
 
-        // We need at least one filter.
-        if (!this.recordId && !this.pickupLib && !this.patronId && !this.pullListOrg) {
+        const filters = this.applyFilters();
+
+        // We need at least one filter. fulfillment_time comes for free, so length > 1
+        if (Object.keys(filters).length <= 1) {
             return new Observable(observer => observer.complete());
         }
-
-        const filters = this.applyFilters();
 
         const orderBy: any = [];
         if (sort.length > 0) {
@@ -537,6 +547,10 @@ export class HoldsGridComponent implements OnInit {
             options.recently_canceled = true;
         } else {
             filters.cancel_time = null;
+        }
+
+        if (this.excludeCaptured) {
+            filters.capture_time = null;
         }
 
         let pfStart = Number(pager.offset);

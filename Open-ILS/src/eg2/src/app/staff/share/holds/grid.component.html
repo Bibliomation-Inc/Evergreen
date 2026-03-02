@@ -138,7 +138,7 @@
 
     <eg-grid #holdsGrid [dataSource]="gridDataSource" [sortable]="true"
       [useLocalSort]="enablePreFetch" [cellTextGenerator]="cellTextGenerator"
-      [showFields]="showFields" [pageSize]="pageSize"
+      [showFields]="showFields" [pageSize]="pageSize" [defaultDatePlusTime]="defaultDatePlusTime"
       [multiSortable]="true" [persistKey]="persistKey"
       (onRowActivate)="showDetail($event)">
 
@@ -171,24 +171,24 @@
       </ng-container>
 
       <eg-grid-toolbar-action
-        i18n-label label="Show Hold Details" i18n-group group="ILL"
+        i18n-label label="Show Request Details" i18n-group group="ILL"
         (onClick)="showDetails($event)"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action
-        i18n-label label="Modify Hold(s)" group="ILL" i18n-group
+        i18n-label label="Modify Request(s)" group="ILL" i18n-group
         (onClick)="showManageDialog($event)">
       </eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!illMode"
         i18n-label label="Show Last Few Circulations" group="Item" i18n-group
         (onClick)="showRecentCircs($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action *ngIf="!patronFocused"
+      <eg-grid-toolbar-action *ngIf="!illMode && !patronFocused"
         i18n-label label="Retrieve Patron" group="Patron" i18n-group
         (onClick)="showPatron($event)">
       </eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!illMode"
         i18n-group group="ILL" i18n-label label="Transfer To Marked Title"
         [disableOnRows]="nonTitleHoldsSelected"
         (onClick)="showTransferDialog($event)">
@@ -203,7 +203,7 @@
         (onClick)="showMarkMissingDialog($event)">
       </eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!illMode"
         i18n-group group="Item" i18n-label label="Mark Item Discard/Weed"
         (onClick)="showMarkDiscardDialog($event)">
       </eg-grid-toolbar-action>
@@ -213,11 +213,11 @@
         (onClick)="showCaptureDialog($event)"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action
-        i18n-group group="ILL" i18n-label label="Find Another Target"
+        i18n-group group="ILL" i18n-label label="Retarget Requests"
         (onClick)="showRetargetDialog($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action *ngIf="!showRecentlyCanceled"
-        i18-group group="ILL" i18n-label label="Cancel Hold"
+      <eg-grid-toolbar-action *ngIf="(!illMode && !showRecentlyCanceled) || (illMode && ill_role=='borrower')"
+        i18-group group="ILL" i18n-label label="Cancel Requests"
         (onClick)="showCancelDialog($event)"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action *ngIf="showRecentlyCanceled"
@@ -226,7 +226,7 @@
       </eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action
-        i18-group group="ILL" i18n-label label="Print ILLs"
+        i18-group group="ILL" i18n-label label="Print Request Details"
         (onClick)="printHolds()"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action *ngIf="hopeless"
@@ -243,7 +243,7 @@
         i18-group group="Item" i18n-label label="Show in Catalog"
         (onClick)="showTitle($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!illMode"
         i18n-label label="Show ILLs For Title" i18n-group group="Show"
         (onClick)="showHoldsForTitle($event)"></eg-grid-toolbar-action>
 
@@ -358,7 +358,8 @@
       <eg-grid-column i18n-label label="Top of Queue" path='cut_in_line' datatype="bool" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Is Mint Condition" path='mint_condition' datatype="bool" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Shelf Expire Time" path='shelf_expire_time' datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
-      <eg-grid-column i18n-label label="Current Shelf Library" path='current_shelf_lib' [hidden]="true"></eg-grid-column>
+      <eg-grid-column i18n-label label="Current Shelf Library" path='csl_shortname' [hidden]="true"></eg-grid-column>
+      <eg-grid-column i18n-label label="Current Shelf Library ID" path='current_shelf_lib' [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Behind Desk" path='behind_desk' datatype="bool" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Hopeless Date" path='hopeless_date' datatype="timestamp" [datePlusTime]="true" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Clearable" path='clear_me' datatype="bool" [hidden]="true"></eg-grid-column>
