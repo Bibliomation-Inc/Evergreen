@@ -18,7 +18,7 @@
   <button class="navbar-toggler text-light" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">&#9776;</button>
 
   <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse">
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.search">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Search
@@ -62,7 +62,7 @@
 
     <!-- CIRCULATION -->
 
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.circulation">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle class="nav-link dropdown-toggle">
           <span i18n>Circulation</span>
@@ -256,7 +256,7 @@
 
     <!-- CIRCULATION (EXPERIMENTAL) -->
 
-    <div class="navbar-nav" *ngIf="showAngularCirc">
+    <div class="navbar-nav" *ngIf="menuAccess.circuation && showAngularCirc">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n 
           class="nav-link dropdown-toggle">
@@ -379,7 +379,7 @@
 
     <!-- CATALOGING -->
     
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.cataloging">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Cataloging
@@ -534,8 +534,7 @@
     </div>
 
     <!-- ACQUISITIONS -->
-    <!-- Hide in FF for now
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.acquisitions">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Acquisitions
@@ -676,10 +675,8 @@
         </div>
       </div>
     </div>
-    -->
 
-    <!-- Hide in FF for now
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.booking">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Booking
@@ -742,9 +739,8 @@
         </div>
       </div>
     </div>
-    -->
 
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.administration">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Administration

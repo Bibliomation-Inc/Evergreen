@@ -35,6 +35,15 @@ export class StaffNavComponent implements OnInit, OnDestroy {
     showAngularCirc = false;
     maxRecentPatrons = 1;
 
+    menuAccess = {
+        search : false,
+        circulation : false,
+        cataloging : false,
+        acquisitions : false,
+        booking : false,
+        administration : false
+    };
+
     // Menu toggle
     isMenuCollapsed = true;
     colorMode: 'auto' | 'light' | 'dark' = 'auto';
@@ -120,6 +129,19 @@ export class StaffNavComponent implements OnInit, OnDestroy {
                     return false;
                 }
             }).then(enable => this.showAngularCirc = enable);
+
+            let tab_perm_map = {};
+
+            Object.keys(this.menuAccess).map(tabname => {
+                const permname = 'ff.menuAccess.'+tabname;
+                tab_perm_map[permname] = tabname;
+            });
+
+            this.perm.hasWorkPermHere(
+                Object.keys(tab_perm_map)
+            ).then(perms => {
+                perms.forEach(perm => this.menuAccess[tab_perm_map[perm]] = perms[perm]);
+            });
         }
 
         const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)');

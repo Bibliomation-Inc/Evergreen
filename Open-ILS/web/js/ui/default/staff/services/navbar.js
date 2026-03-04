@@ -12,6 +12,14 @@ angular.module('egCoreMod')
 
                 $scope.rs = $rootScope;
                 $scope.showAngularCirc = false;
+                $scope.menuAccess = {
+                    search : false,
+                    circulation : false,
+                    cataloging : false,
+                    acquisitions : false,
+                    booking : false,
+                    administration : false
+                };
 
                 $scope.reprintLast = function () {
                     egCore.print.reprintLast();
@@ -173,6 +181,18 @@ angular.module('egCoreMod')
                                     egCore.perm.hasPermHere('ACCESS_ANGULAR_CIRC')
                                     .then(function(yes) { $scope.showAngularCirc = yes; });
                                 }
+                            }).then(function() {
+                                var tab_perm_map = {};
+                                Object.keys($scope.menuAccess).map(tabname => {
+                                    const permname = 'ff.menuAccess.'+tabname;
+                                    tab_perm_map[permname] = tabname;
+                                });
+
+                                return egCore.perm.hasPermHere(
+                                    Object.keys(tab_perm_map)
+                                ).then(function(perms) {
+                                    perms.forEach(perm => $scope.menuAccess[tab_perm_map[perm]] = perms[perm]);
+                                });
                             }).then(function() {
                                 // need to defer initialization of hotkeys to this point
                                 // as it depends on various settings.
