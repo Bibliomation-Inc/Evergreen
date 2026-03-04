@@ -19154,6 +19154,90 @@ SELECT evergreen.setup_delete_protect_rule(
 
 COMMIT;
 
+-- XXX: Change workstation to usr, and cwst to cust, if
+-- we decide on user settings instead of WS settings.
+INSERT INTO config.workstation_setting_type (name, grp, datatype, label)
+VALUES
+(
+    'eg.grid.ff.ill.onshelf.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.onshelf.borrower',
+        'Grid Config: ILL items on Borrower Hold Self',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.onshelf.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.onshelf.lender',
+        'Grid Config: Lender items on remote Hold Selves',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.pending.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.pending.borrower',
+        'Grid Config: Pending ILL Requests for Borrower',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.pending.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.pending.lender',
+        'Grid Config: Pending ILL Requests targeting Lender',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.circulating.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.circulating.borrower',
+        'Grid Config: ILL items circulating at Borrower',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.circulating.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.circulating.lender',
+        'Grid Config: Lender items circulating elsewhere',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.incoming_transit.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.incoming_transit.borrower',
+        'Grid Config: ILL items transiting to Borrower',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.incoming_transit.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.incoming_transit.lender',
+        'Grid Config: Lender items returning from elsewhere',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.outgoing_transit.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.outgoing_transit.borrower',
+        'Grid Config: ILL items transiting home from Borrower',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.outgoing_transit.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.outgoing_transit.lender',
+        'Grid Config: Lender items transiting for ILL elsewhere',
+        'cwst', 'label')
+);
+
+INSERT INTO permission.perm_list (id,code) VALUES
+ (695,'ff.menuAccess.search'),
+ (696,'ff.menuAccess.circulation'),
+ (697,'ff.menuAccess.cataloging'),
+ (698,'ff.menuAccess.acquisitions'),
+ (699,'ff.menuAccess.booking'),
+ (700,'ff.menuAccess.adminstration')
+ON CONFLICT DO NOTHING;
+
+-- Menu visibility for all "administrator" groups
+INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
+   SELECT  pgt.id, perm.id, 0, FALSE
+     FROM  permission.grp_tree pgt,
+           permission.perm_list perm
+     WHERE pgt.name ~ 'Administrator$' AND
+           perm.code ~ '^ff.menuAccess.';
+
+
 ---------------------
 -- This comes after the commit because the table may already exists, and that's fine
 ---------------------

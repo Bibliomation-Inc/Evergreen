@@ -650,25 +650,28 @@ SELECT SETVAL('config.z3950_attr_id_seq'::TEXT, 100);
 
 -- The PINES levels
 INSERT INTO actor.org_unit_type (id, name, opac_label, depth, parent, can_have_users, can_have_vols) VALUES 
-    ( 1, oils_i18n_gettext(1, 'Consortium', 'aout', 'name'),
+    ( 1, oils_i18n_gettext(1, 'Super Consortium', 'aout', 'name'),
 	oils_i18n_gettext(1, 'Everywhere', 'aout', 'opac_label'), 0, NULL, FALSE, FALSE );
 INSERT INTO actor.org_unit_type (id, name, opac_label, depth, parent, can_have_users, can_have_vols) VALUES 
-    ( 2, oils_i18n_gettext(2, 'System', 'aout', 'name'),
-	oils_i18n_gettext(2, 'Local Library System', 'aout', 'opac_label'), 1, 1, FALSE, FALSE );
+    ( 2, oils_i18n_gettext(2, 'Consortium', 'aout', 'name'),
+	oils_i18n_gettext(2, 'Everywhere', 'aout', 'opac_label'), 1, 1, FALSE, FALSE );
+INSERT INTO actor.org_unit_type (id, name, opac_label, depth, parent, can_have_users, can_have_vols) VALUES 
+    ( 3, oils_i18n_gettext(3, 'System', 'aout', 'name'),
+	oils_i18n_gettext(3, 'Local Library System', 'aout', 'opac_label'), 2, 2, FALSE, FALSE );
 INSERT INTO actor.org_unit_type (id, name, opac_label, depth, parent) VALUES 
-    ( 3, oils_i18n_gettext(3, 'Branch', 'aout', 'name'),
-	oils_i18n_gettext(3, 'This Branch', 'aout', 'opac_label'), 2, 2 );
+    ( 4, oils_i18n_gettext(4, 'Branch', 'aout', 'name'),
+	oils_i18n_gettext(4, 'This Branch', 'aout', 'opac_label'), 3, 3 );
 INSERT INTO actor.org_unit_type (id, name, opac_label, depth, parent) VALUES 
-    ( 4, oils_i18n_gettext(4, 'Sub-library', 'aout', 'name'),
-	oils_i18n_gettext(4, 'This Specialized Library', 'aout', 'opac_label'), 3, 3 );
+    ( 5, oils_i18n_gettext(5, 'Sub-library', 'aout', 'name'),
+	oils_i18n_gettext(5, 'This Specialized Library', 'aout', 'opac_label'), 4, 4 );
 INSERT INTO actor.org_unit_type (id, name, opac_label, depth, parent) VALUES 
-    ( 5, oils_i18n_gettext(5, 'Bookmobile', 'aout', 'name'),
-	oils_i18n_gettext(5, 'Your Bookmobile', 'aout', 'opac_label'), 3, 3 );
+    ( 6, oils_i18n_gettext(6, 'Bookmobile', 'aout', 'name'),
+	oils_i18n_gettext(6, 'Your Bookmobile', 'aout', 'opac_label'), 4, 4 );
 SELECT SETVAL('actor.org_unit_type_id_seq'::TEXT, 100);
 
 -- We need one actor.org_unit to own many things
 INSERT INTO actor.org_unit (id, parent_ou, ou_type, shortname, name) VALUES 
-    (1, NULL, 1, 'CONS', oils_i18n_gettext(1, 'Example Consortium', 'aou', 'name'));
+    (1, NULL, 1, 'CONS', oils_i18n_gettext(1, 'Example Super Consortium', 'aou', 'name'));
 SELECT SETVAL('actor.org_unit_id_seq'::TEXT, 100);
 
 INSERT INTO config.billing_type (id, name, owner) VALUES
@@ -2063,7 +2066,7 @@ INSERT INTO permission.perm_list ( id, code, description ) VALUES
 ;
 
 INSERT INTO permission.perm_list (id,code) VALUES
- (677,'ADMIN_OPENAPI'),
+ (694,'ADMIN_OPENAPI'),
  (678,'API_LOGIN'),
  (679,'REST.api'),
  (680,'REST.api.patrons'),
@@ -2074,6 +2077,15 @@ INSERT INTO permission.perm_list (id,code) VALUES
  (685,'REST.api.collections'),
  (686,'REST.api.courses'),
  (687,'group_application.api_integrator')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO permission.perm_list (id,code) VALUES
+ (695,'ff.menuAccess.search'),
+ (696,'ff.menuAccess.circulation'),
+ (697,'ff.menuAccess.cataloging'),
+ (698,'ff.menuAccess.acquisitions'),
+ (699,'ff.menuAccess.booking'),
+ (700,'ff.menuAccess.adminstration')
 ON CONFLICT DO NOTHING;
 
 SELECT SETVAL('permission.perm_list_id_seq'::TEXT, 1000);
@@ -2145,6 +2157,17 @@ INSERT INTO permission.grp_penalty_threshold (grp,org_unit,penalty,threshold)
 
 SELECT SETVAL('permission.grp_penalty_threshold_id_seq'::TEXT, (SELECT MAX(id) FROM permission.grp_penalty_threshold));
 
+-- Menu visibility for all "administrator" groups
+INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
+	SELECT
+		pgt.id, perm.id, 0, FALSE
+	FROM
+		permission.grp_tree pgt,
+		permission.perm_list perm
+	WHERE
+		pgt.name ~ 'Administrator$' AND
+		perm.code ~ '^ff.menuAccess.';
+
 
 -- Add basic user permissions to the Staff and Patrons groups
 
@@ -2157,7 +2180,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name IN ('Staff','Patrons') AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'COPY_CHECKIN',
 			'CREATE_MY_CONTAINER',
@@ -2201,7 +2224,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'Data Review' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'CREATE_COPY_TRANSIT',
 			'CREATE_PRECAT',
@@ -2251,7 +2274,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'Staff' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'CREATE_CONTAINER',
 			'CREATE_CONTAINER_ITEM',
@@ -2345,7 +2368,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'Catalogers' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'ALLOW_ALT_TCN',
 			'CREATE_BIB_IMPORT_QUEUE',
@@ -2437,7 +2460,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'Cataloging Administrator' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'ADMIN_IMPORT_ITEM_ATTR_DEF',
 			'ADMIN_MERGE_PROFILE',
@@ -2630,7 +2653,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'Circulation Administrator' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'ADMIN_MAX_FINE_RULE',
 			'CREATE_CIRC_DURATION',
@@ -2787,7 +2810,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'System Administrator' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code ~ '^VIEW_TRIGGER';
 
 
@@ -2802,7 +2825,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'Global Administrator' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'EVERYTHING');
 
@@ -2820,7 +2843,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'Acquisitions' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'ACQ_ADD_LINEITEM_IDENTIFIER',
 			'ACQ_INVOICE-REOPEN',
@@ -2905,7 +2928,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'Acquisitions Administrator' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'ACQ_INVOICE_REOPEN',
 			'ACQ_XFER_MANUAL_DFUND_AMOUNT',
@@ -3040,7 +3063,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
 		actor.org_unit_type aout
 	WHERE
 		pgt.name = 'Volunteers' AND
-		aout.name = 'Consortium' AND
+		aout.name = 'Super Consortium' AND
 		perm.code IN (
 			'CREATE_COPY_TRANSIT',
 			'CREATE_TRANSACTION',
@@ -15803,7 +15826,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
         actor.org_unit_type aout
     WHERE
         pgt.name = 'Global Administrator' AND
-        aout.name = 'Consortium' AND
+        aout.name = 'Super Consortium' AND
         perm.code = 'ADMIN_SMS_CARRIER';
 
 INSERT INTO action_trigger.reactor (
@@ -23013,7 +23036,7 @@ INSERT INTO permission.grp_perm_map (grp, perm, depth, grantable)
         actor.org_unit_type aout
     WHERE
         (pgt.name = 'Global Administrator' OR pgt.name = 'System Administrator') AND
-        aout.name = 'Consortium' AND
+        aout.name = 'Super Consortium' AND
         (perm.code = 'ADMIN_GEOLOCATION_SERVICES' OR perm.code = 'VIEW_GEOLOCATION_SERVICES');
 
 -- cover image uploads
@@ -27433,3 +27456,66 @@ VALUES (currval('action_trigger.event_definition_id_seq'), 'home_ou'),
 INSERT into action_trigger.hook (key, core_type, description) VALUES
 ( 'au.erenewal', 'au', 'A patron has been renewed via Erenewal');
 
+INSERT INTO config.workstation_setting_type (name, grp, datatype, label)
+VALUES
+(
+    'eg.grid.ff.ill.onshelf.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.onshelf.borrower',
+        'Grid Config: ILL items on Borrower Hold Self',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.onshelf.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.onshelf.lender',
+        'Grid Config: Lender items on remote Hold Selves',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.pending.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.pending.borrower',
+        'Grid Config: Pending ILL Requests for Borrower',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.pending.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.pending.lender',
+        'Grid Config: Pending ILL Requests targeting Lender',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.circulating.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.circulating.borrower',
+        'Grid Config: ILL items circulating at Borrower',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.circulating.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.circulating.lender',
+        'Grid Config: Lender items circulating elsewhere',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.incoming_transit.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.incoming_transit.borrower',
+        'Grid Config: ILL items transiting to Borrower',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.incoming_transit.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.incoming_transit.lender',
+        'Grid Config: Lender items returning from elsewhere',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.outgoing_transit.borrower', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.outgoing_transit.borrower',
+        'Grid Config: ILL items transiting home from Borrower',
+        'cwst', 'label')
+),(
+    'eg.grid.ff.ill.outgoing_transit.lender', 'gui', 'object',
+    oils_i18n_gettext(
+        'eg.grid.ff.ill.outgoing_transit.lender',
+        'Grid Config: Lender items transiting for ILL elsewhere',
+        'cwst', 'label')
+);
