@@ -66,11 +66,8 @@ export class ILLComponent implements OnInit {
 
     fetchSettings(): Promise<any> {
 
-        return this.serverStore.getItemBatch([
-            'ff.ill.nav.collapse'
-        ]).then(prefs => {
-            this.showNav = !prefs['ff.ill.nav.collapse'];
-        });
+        return this.serverStore.getLocalItem('ff.ill.nav.collapse')
+            .then(pref => this.showNav = !pref);
     }
 
     watchForTabChange() {
@@ -130,7 +127,7 @@ export class ILLComponent implements OnInit {
     }
 
     toggleNavPane() {
-        this.serverStore.setItem( // collapse is the opposite of show
+        this.serverStore.setLocalItem( // collapse is the opposite of show
             'ff.ill.nav.collapse', this.showNav);
         this.showNav = !this.showNav;
     }
