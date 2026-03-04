@@ -31,7 +31,7 @@
         class="glyphicon glyphicon-home"></a><li>
 
       <!-- search -->
-      <li class="dropdown" uib-dropdown>
+      <li class="dropdown" uib-dropdown ng-show="menuAccess.search">
         <a href uib-dropdown-toggle>[% l('Search') %]
           <b class="caret" aria-hidden="true"></b>
         </a>
@@ -67,7 +67,7 @@
       </li>
 
 <!-- circulation -->
-      <li class="dropdown" uib-dropdown>
+      <li class="dropdown" ng-show="menuAccess.circulation" uib-dropdown>
         <a href uib-dropdown-toggle>[% l('Circulation') %]<b class="caret" 
           aria-hidden="true"></b>
         </a>
@@ -277,7 +277,7 @@
 
 
       <!-- circulation experimental -->
-      <li class="dropdown" uib-dropdown ng-if="showAngularCirc">
+      <li class="dropdown" uib-dropdown ng-show="menuAccess.circulation" ng-if="showAngularCirc">
         <a href uib-dropdown-toggle>[% l('Circulation (Experimental)') %]
           <b class="caret" aria-hidden="true"></b>
         </a>
@@ -349,7 +349,7 @@
       </li>
 
       <!-- cataloging -->
-      <li class="dropdown" uib-dropdown>
+      <li class="dropdown" ng-show="menuAccess.cataloging" uib-dropdown>
         <a href uib-dropdown-toggle>[% l('Cataloging') %]<b class="caret" 
           aria-hidden="true"></b>
         </a>
@@ -469,8 +469,7 @@
       </li>
 
       <!-- acquisitions -->
-      <!-- Hide in FF for now
-      <li class="dropdown" uib-dropdown>
+      <li class="dropdown" ng-show="menuAccess.acquisitions" uib-dropdown>
         <a href uib-dropdown-toggle>[% l('Acquisitions') %]<b class="caret" 
           aria-hidden="true"></b>
         </a>
@@ -582,11 +581,9 @@
           </li>
        </ul>
       </li>
-      -->
 
       <!-- booking -->
-      <!-- Hide in FF for now
-      <li class="dropdown" uib-dropdown>
+      <li class="dropdown" ng-show="menuAccess.booking" uib-dropdown>
         <a href uib-dropdown-toggle>[% l('Booking') %]<b class="caret" 
           aria-hidden="true"></b>
         </a>
@@ -629,11 +626,10 @@
           </li>
         </ul>
       </li>
-      -->
 
 	
       <!-- admin -->
-      <li class="dropdown" uib-dropdown>
+      <li class="dropdown" ng-show="menuAccess.administration" uib-dropdown>
         <a href uib-dropdown-toggle>[% l('Administration') %]<b class="caret" 
           aria-hidden="true"></b>
         </a>
