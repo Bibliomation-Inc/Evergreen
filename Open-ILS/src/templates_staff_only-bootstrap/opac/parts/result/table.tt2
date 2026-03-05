@@ -387,7 +387,7 @@
                                 
                                 <a href="[% mkurl(ctx.opac_root _ '/place_hold', add_parms, del_parms) %]"
                                     [%- html_text_attr('aria-describedby', 'record_' _ rec.id); -%]
-                                    class="btn btn-action text-start" rel="nofollow" vocab="">
+                                    class="[% IF !ctx.authtoken; 'hide_me '; END %]btn btn-action text-start" rel="nofollow" vocab="">
                                     <span role="text">
                                         <i class="fas fa-check" aria-hidden="true"></i>
                                         <span class="result_place_hold">
