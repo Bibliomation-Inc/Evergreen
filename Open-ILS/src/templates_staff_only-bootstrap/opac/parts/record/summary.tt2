@@ -346,7 +346,7 @@ ctx.metalinks.push('
                 && (ctx.holds_block.enabled != 'true' || !attrs.org_copy_counts.$search_ou.available)
                 )
                 %]
-                <li class="list-group-item">
+                <li class="[% IF !ctx.authtoken; 'hide_me '; END %] list-group-item">
                     <a class="list-group-item-action" href="[% mkurl(ctx.opac_root _ '/place_hold',
                     {hold_target => ctx.mmr_id, hold_type => 'M', hold_source_page => mkurl()}, stop_parms) %]"
                     aria-describedby="rdetail_title">
@@ -359,7 +359,7 @@ ctx.metalinks.push('
                 [%- END -%]
 
                 [%- IF ebook_api.enabled == 'true' && args.ebook %]
-                    <li id="[%- ctx.bre_id -%]_ebook_checkout" class="rdetail_aux_utils ebook_action hidden list-group-item">
+                    <li id="[%- ctx.bre_id -%]_ebook_checkout" class="[% IF !ctx.authtoken; 'hide_me '; END %]rdetail_aux_utils ebook_action hidden list-group-item">
                         <a class="list-group-item-action hidden" href="[% mkurl(ctx.opac_root _ '/myopac/ebook_checkout',
                     {title => args.ebook.ebook_id, vendor => args.ebook.vendor, action => 'checkout'}, stop_parms) %]"
                             rel="nofollow" vocab="" aria-describedby="rdetail_title">
@@ -367,7 +367,7 @@ ctx.metalinks.push('
                                 [% l('Check Out E-Item') %]</span>
                         </a>
                     </li>
-                    <li id="[%- ctx.bre_id -%]_ebook_place_hold" class="rdetail_aux_utils ebook_action hidden list-group-item">
+                    <li id="[%- ctx.bre_id -%]_ebook_place_hold" class="[% IF !ctx.authtoken; 'hide_me '; END %]rdetail_aux_utils ebook_action hidden list-group-item">
                         <a class="list-group-item-action hidden" href="[% mkurl(ctx.opac_root _ '/myopac/ebook_place_hold',
                     {title => args.ebook.ebook_id, vendor => args.ebook.vendor, action => 'place_hold'}, stop_parms) %]"
                             rel="nofollow" vocab="" aria-describedby="rdetail_title">
@@ -422,7 +422,7 @@ ctx.metalinks.push('
                         [% l('Print') %]
                     </a> 
                 </li>
-                <li class="list-group-item">
+                <li class="[% IF !ctx.authtoken; 'hide_me '; END %]list-group-item">
                     <a href="[% mkurl(ctx.opac_root _ '/record/email_preview/' _ ctx.bre_id) %]" class="list-group-item-action"  rel="nofollow"
                         vocab="">
                         <i class="fas fa-envelope-open-text" aria-hidden="true"></i>
