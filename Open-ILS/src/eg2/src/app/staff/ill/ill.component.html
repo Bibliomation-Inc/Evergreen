@@ -27,10 +27,10 @@
     
     <ul ngbNav #illNav="ngbNav" class="nav-tabs flex-column" 
       [keyboard]="true" [roles]="false" role="tablist"
-      [activeId]="activeTab" (navChange)="beforeTabChange($event)">
+      [activeId]="activeTab"> <!-- (navChange)="beforeTabChange($event)"> -->
 
       <li role="presentation" ngbNavItem="singlescan">
-        <button type="button" role="tab" ngbNavLink (click)="navItemClick('singlescan', $event)"
+        <button type="button" role="tab" ngbNavLink
           routerLink="/staff/ill/singlescan" i18n>Single Scan</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Single Scan"></eg-title>
@@ -41,7 +41,7 @@
       </li>
 
       <li role="presentation" ngbNavItem="pending">
-        <button type="button" role="tab" ngbNavLink (click)="navItemClick('pending', $event)"
+        <button type="button" role="tab" ngbNavLink
           routerLink="/staff/ill/pending/{{ill_role}}" i18n>Pending Requests</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
@@ -52,7 +52,7 @@
       </li>
 
       <li role="presentation" ngbNavItem="incoming">
-        <button type="button" role="tab" ngbNavLink (click)="navItemClick('incoming', $event)"
+        <button type="button" role="tab" ngbNavLink
           routerLink="/staff/ill/incoming/{{ill_role}}" i18n>Incoming Transits</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Incoming Transits"></eg-title>
@@ -63,7 +63,7 @@
       </li>
 
       <li role="presentation" ngbNavItem="outgoing">
-        <button type="button" role="tab" ngbNavLink (click)="navItemClick('outgoing', $event)"
+        <button type="button" role="tab" ngbNavLink
           routerLink="/staff/ill/outgoing/{{ill_role}}" i18n>Outgoing Transits</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Outgoing Transits"></eg-title>
@@ -74,7 +74,7 @@
       </li>
 
       <li role="presentation" ngbNavItem="onshelf">
-        <button type="button" role="tab" ngbNavLink (click)="navItemClick('onshelf', $event)"
+        <button type="button" role="tab" ngbNavLink
           routerLink="/staff/ill/onshelf/{{ill_role}}" i18n>On Shelf</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
@@ -85,7 +85,7 @@
       </li>
 
       <li role="presentation" ngbNavItem="circulating">
-        <button type="button" role="tab" ngbNavLink (click)="navItemClick('circulating', $event)"
+        <button type="button" role="tab" ngbNavLink
           routerLink="/staff/ill/circulating/{{ill_role}}" i18n>Currently Circulating</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Currently Circulating"></eg-title>
@@ -106,9 +106,7 @@
 
 
   <div id="ill-tabs">
-    <div *ngIf="!loading">
-      <div [ngbNavOutlet]="illNav"></div>
-    </div>
+    <div [ngbNavOutlet]="illNav"></div>
   </div>
   
 </div> <!-- #ill-grid -->
