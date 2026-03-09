@@ -145,10 +145,10 @@ export class StaffNavComponent implements OnInit, OnDestroy {
                 tab_perm_map[permname] = tabname;
             });
 
-            this.perm.hasWorkPermHere(
+            this.perm.hasWorkPermAt(
                 Object.keys(tab_perm_map)
             ).then(perms => {
-                perms.forEach(perm => this.menuAccess[tab_perm_map[perm]] = perms[perm]);
+                Object.keys(perms).forEach(perm => this.menuAccess[tab_perm_map[perm]] = !!perms[perm]);
             });
         }
 
