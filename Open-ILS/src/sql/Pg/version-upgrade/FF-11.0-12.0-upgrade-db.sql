@@ -19271,3 +19271,52 @@ CREATE CONSTRAINT TRIGGER inherit_copy_block_hold_item_fkey
     AFTER INSERT OR UPDATE ON action.copy_block_hold DEFERRABLE INITIALLY IMMEDIATE
     FOR EACH ROW EXECUTE PROCEDURE evergreen.action_copy_block_hold_item_inh_fkey();
 
+CREATE OR REPLACE FUNCTION actor.org_unit_descendants( INT, INT ) RETURNS SETOF actor.org_unit AS $$
+    WITH RECURSIVE descendant_depth AS (
+        SELECT  *
+          FROM  (SELECT ou.id,
+                        ou.parent_ou,
+                        out.depth
+                  FROM  actor.org_unit ou
+                        JOIN actor.org_unit_type out ON (out.id = ou.ou_type)
+                        JOIN anscestor_depth ad ON (ad.id = ou.id)
+                  WHERE ad.depth >= $2  -- 1) requested depth OR DEEPER to account for unbalanced trees with "skipped" types
+                  ORDER BY ad.depth ASC -- 2) order by depth shallowness, so, as close to the requested depth as available
+                  LIMIT 1               -- 3) just the shallowest (one row required to start the recursion)
+                ) x
+            UNION ALL
+        SELECT  ou.id,
+                ou.parent_ou,
+                out.depth
+          FROM  actor.org_unit ou
+                JOIN actor.org_unit_type out ON (out.id = ou.ou_type)
+                JOIN descendant_depth ot ON (ot.id = ou.parent_ou)
+    ), anscestor_depth AS (
+        SELECT  ou.id,
+                ou.parent_ou,
+                out.depth
+          FROM  actor.org_unit ou
+                JOIN actor.org_unit_type out ON (out.id = ou.ou_type)
+          WHERE ou.id = $1
+            UNION ALL
+        SELECT  ou.id,
+                ou.parent_ou,
+                out.depth
+          FROM  actor.org_unit ou
+                JOIN actor.org_unit_type out ON (out.id = ou.ou_type)
+                JOIN anscestor_depth ot ON (ot.parent_ou = ou.id)
+    ) SELECT ou.* FROM actor.org_unit ou JOIN descendant_depth USING (id);
+$$ LANGUAGE SQL ROWS 1;
+
+CREATE OR REPLACE FUNCTION actor.org_unit_ancestor_at_depth ( INT,INT ) RETURNS actor.org_unit AS $$
+    SELECT  a.*
+      FROM  actor.org_unit a
+      WHERE id IN (
+                SELECT  x.id
+                  FROM  actor.org_unit_ancestors($1) x
+                        JOIN actor.org_unit_type y ON (x.ou_type = y.id AND y.depth >= $2)
+                  ORDER BY y.depth ASC
+                  LIMIT 1
+            );
+$$ LANGUAGE SQL STABLE;
+
