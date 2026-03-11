@@ -191,7 +191,7 @@ angular.module('egCoreMod')
                                 return egCore.perm.hasPermHere(
                                     Object.keys(tab_perm_map)
                                 ).then(function(perms) {
-                                    perms.forEach(perm => $scope.menuAccess[tab_perm_map[perm]] = perms[perm]);
+                                    Object.keys(perms).forEach(perm => $scope.menuAccess[tab_perm_map[perm]] = perms[perm] && perms[perm].length);
                                 });
                             }).then(function() {
                                 // need to defer initialization of hotkeys to this point
