@@ -43,7 +43,7 @@ export interface CircGridEntry extends CircDisplayInfo {
 
 const CIRC_FLESH_DEPTH = 4;
 const CIRC_FLESH_FIELDS = {
-    circ: ['target_copy', 'workstation', 'checkin_workstation', 'circ_lib'],
+    circ: ['target_copy', 'workstation', 'checkin_workstation', 'circ_lib', 'usr'],
     acp:  [
         'call_number',
         'holds_count',
@@ -55,6 +55,7 @@ const CIRC_FLESH_FIELDS = {
         'parts'
     ],
     acpm: ['part'],
+    au: ['card'],
     acn:  ['record', 'owning_lib', 'prefix', 'suffix'],
     bre:  ['wide_display_entry']
 };

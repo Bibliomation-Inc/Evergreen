@@ -276,19 +276,17 @@
       </ng-template>
 
       <eg-grid-column i18n-label label="Request ID" path='id' [index]="true" datatype="id"></eg-grid-column>
-      <eg-grid-column i18n-label label="Item Barcode" name='current_item' [cellTemplate]="barcodeTmpl" [sortable]="false" [multiSortable]="false"></eg-grid-column>
-      <eg-grid-column i18n-label label="Item From" path='cl_shortname'></eg-grid-column>
       <eg-grid-column i18n-label label="Request Date" path='request_time' datatype="timestamp"></eg-grid-column>
-      <eg-grid-column i18n-label label="Expire Time" path='expire_time' datatype="timestamp"></eg-grid-column>
       <eg-grid-column i18n-label label="Supended" path='frozen' datatype="bool"></eg-grid-column>
+      <eg-grid-column i18n-label label="Pickup Library" path='pl_shortname'></eg-grid-column>
+      <eg-grid-column i18n-label label="Item Barcode" name='current_item' [cellTemplate]="barcodeTmpl" [sortable]="false" [multiSortable]="false"></eg-grid-column>
+      <eg-grid-column i18n-label label="Title" name='title' [cellTemplate]="titleTmpl" [sortable]="false" [multiSortable]="false"></eg-grid-column>
+      <eg-grid-column i18n-label label="Hold Status" [cellTemplate]="statusTemplate" name="status_string" [sortable]="false" [multiSortable]="false"></eg-grid-column>
+      <eg-grid-column i18n-label label="Item From" path='cl_shortname'></eg-grid-column>
+      <eg-grid-column i18n-label label="Expire Time" path='expire_time' datatype="timestamp"></eg-grid-column>
       <eg-grid-column i18n-label label="Active Date" path='thaw_date' datatype="timestamp"></eg-grid-column>
       <eg-grid-column i18n-label label="Requesting Library" path='rl_shortname'></eg-grid-column>
-      <eg-grid-column i18n-label label="Pickup Library" path='pl_shortname'></eg-grid-column>
-      <eg-grid-column i18n-label label="Title" name='title' [cellTemplate]="titleTmpl"></eg-grid-column>
       <eg-grid-column i18n-label label="Potential Items" path='potentials' datatype="int"></eg-grid-column>
-      <eg-grid-column i18n-label label="Hold Status" [cellTemplate]="statusTemplate" name="status_string"
-        [sortable]="false" [multiSortable]="false">
-      </eg-grid-column>
 
 
       <!-- ----------------------------------------------------------------------------------------------- -->
@@ -310,8 +308,10 @@
           {{hold.ucard_barcode}}
         </a>
       </ng-template>
-      <eg-grid-column i18n-label label="Patron Barcode" path="ucard_barcode"
+
+      <eg-grid-column *ngIf="!illMode" i18n-label label="Patron Barcode" path="ucard_barcode"
         [cellTemplate]="userBarcodeTmpl" [hidden]="true"></eg-grid-column>
+      <eg-grid-column *ngIf="illMode" i18n-label label="Patron Barcode" path="ucard_barcode" [hidden]="true"/>
 
       <eg-grid-column i18n-label label="Patron Home Library" path="ul_shortname" [hidden]="true"></eg-grid-column>
       <eg-grid-column i18n-label label="Patron Alias" path="usr_alias" [hidden]="true"></eg-grid-column>
