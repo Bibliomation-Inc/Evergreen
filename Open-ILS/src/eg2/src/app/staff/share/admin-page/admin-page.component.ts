@@ -728,6 +728,10 @@ export class AdminPageComponent implements OnInit {
 export interface TemplateField {
     cellTemplate: TemplateRef<any>;
     name: string;
+    label?: string;
+    notFilterable?: boolean;
+    notSortable?: boolean;
+    notMultiSortable?: boolean;
 }
 
 export interface TemplateAction {

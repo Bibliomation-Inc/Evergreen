@@ -137,12 +137,12 @@
     datatype="timestamp"></eg-grid-column>
 
   <eg-grid-column path="copy.barcode" label="Barcode" i18n-label
-    [cellTemplate]="barcodeTemplate"></eg-grid-column>
+    [sortable]="false" [cellTemplate]="barcodeTemplate"></eg-grid-column>
 
   <eg-grid-column path="copy.circ_lib.shortname" label="Copy Library" i18n-label/>
 
   <eg-grid-column path="title" label="Title" i18n-label
-    [cellTemplate]="titleTemplate"></eg-grid-column>
+    [sortable]="false" [cellTemplate]="titleTemplate"></eg-grid-column>
 
   <eg-grid-column path="circ.stop_fines" label="Fines Stopped"
     i18n-label></eg-grid-column>

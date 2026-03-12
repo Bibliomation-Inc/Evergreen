@@ -28,7 +28,7 @@
       <eg-admin-page idlClass="atc" pageSize="25"
         persistKey="ff.ill.{{direction}}_transit.borrower"
         sortField="source_send_time"
-        fieldOrder="source_send_time,source"
+        fieldOrder="routing_code,barcode,title,source_send_time,source,dest"
         hideGridFields="id,target_copy,cancel_time,dest_recv_time,prev_hop,copy_status,persistant_transfer,prev_dest"
         [disableOrgFilter]="true"
         [disableDelete]="true"
@@ -39,7 +39,7 @@
         [defaultDatePlusTime]="true"
         [baseFilter]="liveFilters.borrower"
         [baseFlesh]="{depth: 4, fields:{atc:['target_copy','source','dest'],acp:['call_number','circ_lib'],acn:['record'],bre:['wide_display_entry']}, select: {bre : ['id']}}"
-        [templateFields]="[{name: 'Routing Code', template: routingCodeTmpl},{name: 'Item Barcode', template: itemBarcodeTmpl},{name: 'Copy Library', template: copyLibTmpl},{name: 'Title', template: titleTmpl}]"
+        [templateFields]="[{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'routing_code', label: 'Routing Code', template: routingCodeTmpl},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'barcode', label: 'Item Barcode', template: itemBarcodeTmpl},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'copy_lib', label: 'Copy Library', template: copyLibTmpl},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'title', label: 'Title', template: titleTmpl}]"
       />
     </ng-template>
   </li>
@@ -50,7 +50,7 @@
       <eg-admin-page idlClass="atc" pageSize="25"
         persistKey="ff.ill.{{direction}}_transit.lender"
         sortField="source_send_time"
-        fieldOrder="source_send_time,source"
+        fieldOrder="routing_code,barcode,title,source_send_time,source,dest"
         hideGridFields="id,target_copy,cancel_time,dest_recv_time,prev_hop,copy_status,persistant_transfer,prev_dest"
         [disableOrgFilter]="true"
         [disableDelete]="true"
@@ -61,7 +61,7 @@
         [defaultDatePlusTime]="true"
         [baseFilter]="liveFilters.lender"
         [baseFlesh]="{depth: 4, fields:{atc:['target_copy','source','dest'],acp:['call_number','circ_lib'],acn:['record'],bre:['wide_display_entry']}, select: {bre : ['id']}}"
-        [templateFields]="[{name: 'Routing Code', template: routingCodeTmpl},{name: 'Item Barcode', template: itemBarcodeTmpl},{name: 'Title', template: titleTmpl}]"
+        [templateFields]="[{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'routing_code', label: 'Routing Code', template: routingCodeTmpl},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'barcode', label: 'Item Barcode', template: itemBarcodeTmpl},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'copy_lib', label: 'Copy Library', template: copyLibTmpl},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'title', label: 'Title', template: titleTmpl}]"
       />
     </ng-template>
   </li>
