@@ -80,6 +80,14 @@ export class CircGridComponent implements OnInit {
     @Input() pageSize: number = null;
     @Input() defaultDatePlusTime: boolean;
 
+    // Additional action menu options, added at the top of the menu or group
+    // [{ label: string, method: function(any[]), group: string }, ...]
+    @Input() customActions: any[];
+
+    // Additional toolbar buttons, added at the end of the toolbar
+    // [{ label: string, method: function(any[]) }, ...]
+    @Input() customButtons: any[];
+
     // Emitted when a grid action modified data in a way that could
     // affect which cirulcations should appear in the grid.  Caller
     // should then refresh their data and call the load() or

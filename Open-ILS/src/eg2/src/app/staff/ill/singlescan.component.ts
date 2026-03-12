@@ -373,7 +373,7 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
             template_data.hold_shelf_time = this.disposition.hold.shelf_time();
             template_data.hold_shelf_expire_time = this.disposition.hold.shelf_expire_time();
             template_data.hold_cancel_time = this.disposition.hold.cancel_time();
-            template_data.hold_cancel_cause = this.disposition.hold.cancel_cause().label();
+            template_data.hold_cancel_cause = this.disposition.hold.cancel_cause()?.label();
         }
 
         if (this.disposition.circ) {

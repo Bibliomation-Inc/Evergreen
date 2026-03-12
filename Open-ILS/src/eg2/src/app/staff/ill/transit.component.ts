@@ -2,10 +2,11 @@ import {Component, OnInit, Input} from '@angular/core';
 import {Router, ActivatedRoute, ParamMap} from '@angular/router';
 import {Location} from '@angular/common';
 import {OrgService} from '@eg/core/org.service';
-import {NetService} from '@eg/core/net.service';
+import {PcrudService} from '@eg/core/pcrud.service';
 import {StoreService} from '@eg/core/store.service';
 import {NgbNav, NgbNavChangeEvent} from '@ng-bootstrap/ng-bootstrap';
 import {AdminPageComponent} from '@eg/staff/share/admin-page/admin-page.component';
+import {ILLService} from './ill.service';
 
 @Component({
     templateUrl: 'transit.component.html',
@@ -19,14 +20,33 @@ export class TransitComponent implements OnInit {
 
     liveFilters = { borrower: null, lender: null };
     linkLabels = { borrower: null, lender: null };
+    customActions = { borrower: [], lender: [] };
 
     constructor(
         private router: Router,
         private ngLocation: Location,
         private org: OrgService,
-        private net: NetService,
+        private pcrud: PcrudService,
+        private ill: ILLService,
         private store: StoreService
     ) {}
+
+    cancel_requests(rows: any[]) {
+        rows.forEach(row => {
+            this.pcrud.retrieve('ahtc', row.id())
+                .toPromise()
+                .then( ht => this.ill.cancel(ht.id()) )
+        });
+    }
+
+    abort_transits(rows: any[]) {
+        rows.forEach(row => {
+            this.ill.circAPIRequest(
+                'open-ils.circ.transit.abort',
+                {transitid : row.id()}
+            );
+        });
+    }
 
     ngOnInit() {
         const fullPath = this.org.fullPath(this.contextOrg, true);
@@ -39,11 +59,21 @@ export class TransitComponent implements OnInit {
             this.linkLabels.lender = $localize`My Returns`;
 
             source = {'not in' : source};
+
+            this.customActions.borrower.push({
+                label: $localize`Cancel Requests`,
+                method: (rows) => this.cancel_requests(rows)
+            });
         } else {
             this.linkLabels.lender = $localize`ILLs to Other Libraries`;
             this.linkLabels.borrower = $localize`Returns to Other Libraries`;
 
             dest = {'not in' : dest};
+
+            this.customActions.lender.push({
+                label: $localize`Abort Transits`,
+                method: (rows) => this.abort_transits(rows)
+            });
         }
 
         this.liveFilters.borrower = {

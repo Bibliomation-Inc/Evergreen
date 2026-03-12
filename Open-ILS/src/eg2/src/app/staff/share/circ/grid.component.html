@@ -42,6 +42,19 @@
 
   <ng-container *ngIf="menuStyle === 'full'">
 
+    <ng-container *ngFor="let cb of customButtons">
+      <eg-grid-toolbar-button label="{{cb.label}}"
+        (onClick)="customMethodCallback(cb.method, $event)">
+      </eg-grid-toolbar-button>
+    </ng-container>
+
+    <ng-container *ngFor="let ca of customActions">
+      <eg-grid-toolbar-action label="{{ca.label}}"
+        [group]="ca.group"
+        (onClick)="customMethodCallback(ca.method, $event)">
+      </eg-grid-toolbar-action>
+    </ng-container>
+
     <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-label label="Print Item Receipt(s)" (onClick)="printReceipts($event)">
     </eg-grid-toolbar-action>
@@ -61,12 +74,12 @@
       (onClick)="openBillingDialog($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action *ngIf="!illMode || ill_role=='borrower'"
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-group group="Circulation" i18n-label label="Edit Due Date"
       (onClick)="editDueDate($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action *ngIf="!illMode || ill_role=='borrower'"
+    <eg-grid-toolbar-action *ngIf="!illMode"
       group="Mark" i18n-group i18n-label label="Mark Item Damaged"
       (onClick)="markDamaged($event)"></eg-grid-toolbar-action>
 

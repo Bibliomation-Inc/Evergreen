@@ -103,10 +103,14 @@ export class StaffSplashComponent implements OnInit {
     searchCatalog(): void {
         if (!this.catSearchQuery) { return; }
 
+        window.open('/eg/opac/results?modifier=metabib&query='+encodeURIComponent(this.catSearchQuery));
+
+        /* XXX we search the catalog via the OPAC in FF
         this.router.navigate(
             ['/staff/catalog/search'],
             {queryParams: {query : this.catSearchQuery}}
         );
+        */
     }
 }
 
