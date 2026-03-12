@@ -19320,3 +19320,20 @@ CREATE OR REPLACE FUNCTION actor.org_unit_ancestor_at_depth ( INT,INT ) RETURNS 
             );
 $$ LANGUAGE SQL STABLE;
 
+DELETE FROM config.ui_staff_portal_page_entry;
+
+INSERT INTO config.ui_staff_portal_page_entry
+    (id, page_col, col_pos, entry_type, label, image_url, target_url, url_newtab, owner)
+VALUES
+    ( 1, 1, 0, 'header',        oils_i18n_gettext( 1, 'ILL Management', 'cusppe', 'label'), NULL, NULL, NULL, 1)
+,   ( 2, 1, 1, 'menuitem',      oils_i18n_gettext( 2, 'ILL Processing', 'cusppe', 'label'), '/images/portal/book.png', '/eg2/staff/ill', NULL, 1)
+,   ( 3, 1, 2, 'menuitem',      oils_i18n_gettext( 3, 'Pending Requests', 'cusppe', 'label'), '/images/portal/retreivepatron.png', '/eg2/staff/ill/pending', NULL, 1)
+,   ( 4, 1, 3, 'menuitem',      oils_i18n_gettext( 4, 'ILL Pull List', 'cusppe', 'label'), '/images/portal/holds.png', '/eg2/staff/circ/holds/pull-list', NULL, 1)
+,   ( 5, 2, 0, 'header',        oils_i18n_gettext( 5, 'Bibliographic Search', 'cusppe', 'label'), NULL, NULL, NULL, 1)
+,   ( 6, 2, 1, 'catalogsearch', oils_i18n_gettext( 6, 'Search Catalog', 'cusppe', 'label'), NULL, NULL, NULL, 1)
+,   ( 9, 3, 0, 'header',        oils_i18n_gettext( 9, 'Administration', 'cusppe', 'label'), NULL, NULL, NULL, 1)
+,   (10, 3, 1, 'link',          oils_i18n_gettext(10, 'Fulfillment Documentation', 'cusppe', 'label'), '/images/portal/helpdesk.png', 'https://docs.evergreen-ils.org', TRUE, 1)
+,   (11, 3, 2, 'menuitem',      oils_i18n_gettext(11, 'Workstation Administration', 'cusppe', 'label'), '/images/portal/helpdesk.png', '/eg/staff/admin/workstation/index', NULL, 1)
+,   (12, 3, 3, 'menuitem',      oils_i18n_gettext(12, 'Reports', 'cusppe', 'label'), '/images/portal/reports.png', '/eg2/staff/reporter/full', NULL, 1)
+;
+
