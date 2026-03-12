@@ -1,4 +1,5 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, OnInit, Input, ViewChild} from '@angular/core';
+import {lastValueFrom, defaultIfEmpty} from 'rxjs';
 import {HoldsGridComponent} from  '@eg/staff/share/holds/grid.component';
 import {Router, ActivatedRoute, ParamMap} from '@angular/router';
 import {Location} from '@angular/common';
@@ -6,16 +7,19 @@ import {OrgService} from '@eg/core/org.service';
 import {NetService} from '@eg/core/net.service';
 import {StoreService} from '@eg/core/store.service';
 import {NgbNav, NgbNavChangeEvent} from '@ng-bootstrap/ng-bootstrap';
+import {DisallowItemComponent, DisallowDialogResult} from './disallow-item.component';
 import {ILLService} from './ill.service';
 
 @Component({
     templateUrl: 'pending.component.html',
     selector: 'ff-ill-requests'
 })
-export class PendingRequestsComponent {
+export class PendingRequestsComponent implements OnInit {
 
     @Input() contextOrg: number;
     @Input() ill_role: string;
+
+    @ViewChild('disallowDialog') private disallowDialog: DisallowItemComponent;
 
     customActions: any[];
 
@@ -36,6 +40,17 @@ export class PendingRequestsComponent {
             label: $localize`Suspend Requests`,
             method: (rows) => this.suspend_holds(rows)
         }];
+
+    }
+
+    ngOnInit() {
+        if (this.ill_role === 'lender') {
+            this.customActions.push({
+                group: 'ILL',
+                label: $localize`Disallow Request`,
+                method: (rows) => this.popup_block_ill(rows)
+            });
+        }
     }
 
     // Navigate, opening new tabs when requested via control-click.
@@ -81,6 +96,64 @@ export class PendingRequestsComponent {
 
     newHold() {
         this.router.navigate(['/staff/catalog/search']);
+    }
+
+    async popup_block_ill(rows): Promise<any> {
+        const promises = rows.map(row => {
+            return this.ill.getTransactionDispositionByBarcode(row.cp_barcode)
+                .then( dispoList => {
+                    let disposition = dispoList[0];
+
+                    if (disposition) {
+                        this.disallowDialog.barcode = disposition.copy.barcode();
+                        this.disallowDialog.willCancelTransit = !!disposition.open_transit;
+                        this.disallowDialog.currentlyTargeted = !!disposition.open_hold;
+
+                        return this.disallowDialog.open().pipe(
+                            defaultIfEmpty({rejected: true})
+                        ).toPromise().then( result => {
+                            if (!result.rejected) {
+                                const block_scope = result.blockAll ? 'block_all' : 'block_one';
+
+                                if (!!disposition.open_transit) {
+                                    return this.ill.circAPIRequest(
+                                        'open-ils.circ.transit.abort',
+                                        {transitid : disposition.transit.id()}
+                                    ).then(() => this[block_scope](result.blockReason, disposition));
+                                } else {
+                                    return this[block_scope](result.blockReason, disposition);
+                                }
+                            } else {
+                                console.debug('hold blocking canceled');
+                                return Promise.resolve(true);
+                            }
+                        });
+
+                    }
+                    return Promise.resolve(true);
+                });
+            }
+        );
+
+        return Promise.all(promises);
+    }
+
+    block_one(reason: string, disposition): Promise<any> {
+        console.debug('blocking one hold: ' + disposition.hold.id());
+
+        return this.ill.circAPIRequest(
+            'open-ils.circ.hold.block',
+            disposition.copy.id(), reason, disposition.hold.id()
+        );
+    }
+
+    block_all(reason: string, disposition): Promise<any> {
+        console.debug('blocking all holds for barcode '+disposition.copy.barcode());
+
+        return this.ill.circAPIRequest(
+            'open-ils.circ.hold.block',
+            disposition.copy.id(), reason
+        );
     }
 }
 

@@ -170,11 +170,11 @@
         </eg-grid-toolbar-action>
       </ng-container>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!hideILLActions"
         i18n-label label="Show Request Details" i18n-group group="ILL"
         (onClick)="showDetails($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!illMode || ill_role == 'borrower'"
         i18n-label label="Modify Request(s)" group="ILL" i18n-group
         (onClick)="showManageDialog($event)">
       </eg-grid-toolbar-action>
@@ -194,11 +194,11 @@
         (onClick)="showTransferDialog($event)">
       </eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!illMode"
         group="Item" i18n-group i18n-label label="Mark Item Damaged"
         (onClick)="showMarkDamagedDialog($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!illMode"
         i18n-group group="Item" i18n-label label="Mark Item Missing"
         (onClick)="showMarkMissingDialog($event)">
       </eg-grid-toolbar-action>
@@ -212,7 +212,7 @@
         i18n-group group="ILL" i18n-label label="Capture Item" *ngIf="showCaptureAction"
         (onClick)="showCaptureDialog($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!hideILLActions"
         i18n-group group="ILL" i18n-label label="Retarget Requests"
         (onClick)="showRetargetDialog($event)"></eg-grid-toolbar-action>
 
@@ -225,7 +225,7 @@
         (onClick)="showUncancelDialog($event)">
       </eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action
+      <eg-grid-toolbar-action *ngIf="!hideILLActions"
         i18-group group="ILL" i18n-label label="Print Request Details"
         (onClick)="printHolds()"></eg-grid-toolbar-action>
 
