@@ -528,10 +528,19 @@ export class GridColumnSet {
             // fields to show or hide by default
 
             if (this.defaultVisibleFields) {
-                this.columns.forEach(col => {
-                    if (this.defaultVisibleFields.includes(col.name)) {
-                        col.visible = true;
-                    } else {
+
+                let newCols = [];
+
+                // First, we shove the defaultVisibleFields (aka "showFields") to the front of the list, in the requested order
+                this.defaultVisibleFields.forEach((dvf, dvfAt) => {
+                    const foundAt = this.columns.findIndex(c => c.name === dvf);
+                    const [extracted] = this.columns.splice(foundAt,1);
+                    extracted.visible = true;
+                    this.columns.splice(dvfAt, 0, extracted);
+                });
+
+                this.columns.forEach((col, ind) => {
+                    if (ind >= this.defaultVisibleFields.length) {
                         col.visible = false;
                     }
                 });
