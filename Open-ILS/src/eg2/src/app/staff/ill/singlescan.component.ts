@@ -559,7 +559,7 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
                     && Date.parse(active_dispo.transit.source_send_time()) < Date.parse((new Date()).toISOString().substr(0,10)) // and it was sent before today
                 ) {
                     dispo.next_action_step = 'round_trip';
-                    dispo.next_action_label = $localize`Perform full Borrower Round-trip`;
+                    dispo.next_action_label = $localize`Begin full Borrower Round-trip`;
                     dispo.can_round_trip = true;
                 } else if ( active_dispo.copy && active_dispo.hold && !active_dispo.circ // it's captured for a patron ...
                             && this.org.fullPath(this.contextOrg, true).includes(active_dispo.copy.circ_lib().id()) // ... and we own it ...
@@ -567,7 +567,7 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
                             && (!active_dispo.transit || Date.parse(active_dispo.transit.source_send_time()) < Date.parse((new Date()).toISOString().substr(0,10))) // and it was sent before today
                 ) {
                     dispo.next_action_step = 'round_trip';
-                    dispo.next_action_label = $localize`Perform ILL for Borrower`;
+                    dispo.next_action_label = $localize`Begin ILL for Borrower`;
                     dispo.can_round_trip = true;
                 } else if ( active_dispo.copy && active_dispo.circ // it's out to a patron ...
                             && this.org.fullPath(this.contextOrg, true).includes(active_dispo.copy.circ_lib().id()) // ... and we own it ...
