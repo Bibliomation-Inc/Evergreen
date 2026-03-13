@@ -168,7 +168,9 @@
   <eg-grid-column path="nonCatCount" label="Non-Cataloged Count"
     [hidden]="true" i18n-label></eg-grid-column>
 
-  <eg-grid-column path="circ.usr.fist_given_name" [required]="true" [hidden]="true"></eg-grid-column>
+  <eg-grid-column path="circ.usr.fist_given_name" [hidden]="true"></eg-grid-column>
+
+  <eg-grid-column label="Patron Barcode" i18n-label path="circ.usr.card.barcode" [hidden]="true"></eg-grid-column>
 
   <eg-grid-column path="circ.*" idlClass="circ" [hidden]="true"></eg-grid-column>
 
