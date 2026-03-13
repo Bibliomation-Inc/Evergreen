@@ -823,7 +823,7 @@ export class HoldsGridComponent implements OnInit {
 
 
     showCaptureDialog(rows: any[]) {
-        const copyIds = rows.map(r => r.target_copy).filter(id => Boolean(id));
+        const copyIds = rows.map(r => r.cp_id).filter(id => Boolean(id));
         if (copyIds.length > 0) {
             this.captureDialog.copyIds = copyIds;
             this.captureDialog.open({}).subscribe(
