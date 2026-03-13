@@ -11,7 +11,7 @@
         persistKey="ff.ill.circulating.borrower"
         (reloadRequested)="loadHere()"
         sortField="due_date" [illMode]="true" [ill_role]="ill_role"
-        showFields="circ.id,copy.barcode,copy.circ_lib,circ.usr.fist_given_name,circ.xact_start,dueDate,circ.circ_lib,title"
+        showFields="dueDate,copy.barcode,title,circ.circ_lib.shortname,circ.workstation.name,circ.renewal_remaining,circ.usr.card.barcode"
       />
     </ng-template>
   </li>
@@ -23,7 +23,7 @@
         persistKey="ff.ill.circulating.lender"
         (reloadRequested)="loadThere()"
         sortField="due_date" [illMode]="true" [ill_role]="ill_role"
-        showFields="circ.id,copy.barcode,copy.circ_lib,circ.usr.fist_given_name,circ.xact_start,dueDate,circ.circ_lib,title"
+        showFields="dueDate,copy.barcode,title,circ.circ_lib.shortname,circ.workstation.name,circ.renewal_remaining"
       />
     </ng-template>
   </li>
