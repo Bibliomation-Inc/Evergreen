@@ -1,4 +1,5 @@
 [% IF ctx.saved_searches.size %]
+<!--
 <details class="card" id="accordion">
   <summary class="card-header" id="headRecent">
     <h2 class="mb-0">[% l("Recent searches") %]</h2>
@@ -12,5 +13,5 @@
       [% END %]
   </div>
 </details>
-
+-->
 [% END %]
