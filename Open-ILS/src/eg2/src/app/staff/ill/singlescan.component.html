@@ -6,7 +6,7 @@
       <div class="input-group">
         <span class="input-group-text" i18n>Barcode</span>
         <input type="text" class="form-control" id="sstsBarcodeInput"
-          placeholder="Barcode..." i18n-placeholder [(ngModel)]="barcode" (focus)="$event.target.select()"
+          [(ngModel)]="barcode" (focus)="$event.target.select()"
           i18n-aria-label aria-label="Barcode Input" (keydown.enter)="takeBarcode()" />
         <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
           (keydown.enter)="takeBarcode()" (click)="takeBarcode()" i18n>Go!</button>

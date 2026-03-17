@@ -25,79 +25,60 @@
       </span>
     </button>
     
-    <ul ngbNav #illNav="ngbNav" class="nav-tabs flex-column" 
-      [keyboard]="true" [roles]="false" role="tablist"
-      [activeId]="activeTab"> <!-- (navChange)="beforeTabChange($event)"> -->
+    <ul ngbNav #illNav="ngbNav" class="nav-pills flex-column"
+      orientation="vertical" [activeId]="activeTab" [keyboard]="false">
 
-      <li role="presentation" ngbNavItem="singlescan">
-        <button type="button" role="tab" ngbNavLink
-          routerLink="/staff/ill/singlescan" i18n>Single Scan</button>
+      <li ngbNavItem="singlescan">
+        <button ngbNavLink routerLink="/staff/ill/singlescan" i18n>Single Scan</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Single Scan"></eg-title>
-          <div class="">
-            <ff-singlescan [contextOrg]="contextOrg" [barcode]="route_barcode"></ff-singlescan>
-          </div>
+          <ff-singlescan [contextOrg]="contextOrg" [barcode]="route_barcode"/>
         </ng-template>
       </li>
 
-      <li role="presentation" ngbNavItem="pending">
-        <button type="button" role="tab" ngbNavLink
-          routerLink="/staff/ill/pending/{{ill_role}}" i18n>Pending Requests</button>
+      <li ngbNavItem="pending">
+        <button ngbNavLink class='nav-link' routerLink="/staff/ill/pending/{{ill_role}}" i18n>Pending Requests</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
-          <div class="">
-            <ff-ill-requests [contextOrg]="contextOrg" [ill_role]="ill_role"></ff-ill-requests>
-          </div>
+          <ff-ill-requests [contextOrg]="contextOrg" [ill_role]="ill_role"/>
         </ng-template>
       </li>
 
-      <li role="presentation" ngbNavItem="incoming">
-        <button type="button" role="tab" ngbNavLink
-          routerLink="/staff/ill/incoming/{{ill_role}}" i18n>Incoming Transits</button>
+      <li ngbNavItem="incoming">
+        <button ngbNavLink routerLink="/staff/ill/incoming/{{ill_role}}" i18n>Incoming Transits</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Incoming Transits"></eg-title>
-          <div class="">
-            <ff-transits [contextOrg]="contextOrg" direction="incoming" [ill_role]="ill_role"></ff-transits>
-          </div>
+          <ff-transits [contextOrg]="contextOrg" direction="incoming" [ill_role]="ill_role"/>
         </ng-template>
       </li>
 
-      <li role="presentation" ngbNavItem="outgoing">
-        <button type="button" role="tab" ngbNavLink
-          routerLink="/staff/ill/outgoing/{{ill_role}}" i18n>Outgoing Transits</button>
+      <li ngbNavItem="outgoing">
+        <button ngbNavLink routerLink="/staff/ill/outgoing/{{ill_role}}" i18n>Outgoing Transits</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Outgoing Transits"></eg-title>
-          <div class="">
-            <ff-transits [contextOrg]="contextOrg" direction="outgoing" [ill_role]="ill_role"></ff-transits>
-          </div>
+          <ff-transits [contextOrg]="contextOrg" direction="outgoing" [ill_role]="ill_role"/>
         </ng-template>
       </li>
 
-      <li role="presentation" ngbNavItem="onshelf">
-        <button type="button" role="tab" ngbNavLink
-          routerLink="/staff/ill/onshelf/{{ill_role}}" i18n>On Shelf</button>
+      <li role="presentation" ngbNavItem="onshelf" class='nav-item'>
+        <button ngbNavLink routerLink="/staff/ill/onshelf/{{ill_role}}" i18n>On Shelf</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
-          <div class="">
-            <ff-ill-onshelf [contextOrg]="contextOrg" [ill_role]="ill_role"></ff-ill-onshelf>
-          </div>
+          <ff-ill-onshelf [contextOrg]="contextOrg" [ill_role]="ill_role"/>
         </ng-template>
       </li>
 
-      <li role="presentation" ngbNavItem="circulating">
-        <button type="button" role="tab" ngbNavLink
-          routerLink="/staff/ill/circulating/{{ill_role}}" i18n>Currently Circulating</button>
+      <li ngbNavItem="circulating">
+        <button ngbNavLink routerLink="/staff/ill/circulating/{{ill_role}}" i18n>Currently Circulating</button>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Currently Circulating"></eg-title>
-          <div class="">
-            <ff-ill-circulating [contextOrg]="contextOrg" [ill_role]="ill_role"></ff-ill-circulating>
-          </div>
+          <ff-ill-circulating [contextOrg]="contextOrg" [ill_role]="ill_role"/>
         </ng-template>
       </li>
 
-      <li role="presentation">
+      <li class='nav-item'>
         <div class="ms-1 mt-3">
-          <a role="link" target="_blank" href="/eg/opac" i18n>Search the catalog</a>
+          <a role="link" class="nav-link" target="_blank" href="/eg/opac" i18n>Search the catalog</a>
         </div>
       </li>
 

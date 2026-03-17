@@ -1,11 +1,9 @@
 
 
-<ul ngbNav #holdsNav="ngbNav" class="nav-tabs"
-    [activeId]="ill_role" [keyboard]="true" (navChange)="beforeTabChange($event)"
-    [roles]="false" role="tablist">
+<ul ngbNav #holdsNav="ngbNav" class="nav-tabs" [activeId]="ill_role" [keyboard]="false" (navChange)="beforeTabChange($event)">
 
-  <li role="presentation" ngbNavItem="borrower">
-    <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)" i18n>For My Patrons</a>
+  <li ngbNavItem="borrower">
+    <a ngbNavLink (click)="navItemClick('borrower', $event)" i18n>For My Patrons</a>
     <ng-template ngbNavContent>
       <eg-circ-grid #toMyPatrons pageSize="25"
         persistKey="ff.ill.circulating.borrower"
@@ -16,8 +14,8 @@
     </ng-template>
   </li>
 
-  <li role="presentation" ngbNavItem="lender">
-    <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)" i18n>At Other Libraries</a>
+  <li ngbNavItem="lender">
+    <a ngbNavLink (click)="navItemClick('lender', $event)" i18n>At Other Libraries</a>
     <ng-template ngbNavContent>
       <eg-circ-grid #toOtherLibraries pageSize="25"
         persistKey="ff.ill.circulating.lender"
