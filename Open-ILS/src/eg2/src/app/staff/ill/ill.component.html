@@ -1,9 +1,9 @@
 <eg-staff-banner bannerText="ILL Management" i18n-bannerText></eg-staff-banner>
 
 <div id="ill-grid" [ngClass]="{'show-nav': showNav}"
-  role="region" aria-label="Account summary" i18n-aria-label>
+  role="region" aria-label="ILL Management" i18n-aria-label>
 
-  <nav id="ill-nav" aria-label="Account details" i18n-aria-label>
+  <nav id="ill-nav" aria-label="ILL Management Actions" i18n-aria-label>
     <button type="button" (click)="toggleNavPane()"
       class="nav-link btn btn-sm svg-icon-button ill-nav-toggle"
       [title]="showNav ? 'Hide Navigation' : 'Show Navigation'" i18n-title
@@ -29,7 +29,7 @@
       orientation="vertical" [activeId]="activeTab" [keyboard]="false">
 
       <li ngbNavItem="singlescan">
-        <button ngbNavLink routerLink="/staff/ill/singlescan" i18n>Single Scan</button>
+        <a ngbNavLink routerLink="/staff/ill/singlescan" i18n>Single Scan</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Single Scan"></eg-title>
           <ff-singlescan [contextOrg]="contextOrg" [barcode]="route_barcode"/>
@@ -37,7 +37,7 @@
       </li>
 
       <li ngbNavItem="pending">
-        <button ngbNavLink class='nav-link' routerLink="/staff/ill/pending/{{ill_role}}" i18n>Pending Requests</button>
+        <a ngbNavLink class='nav-link' routerLink="/staff/ill/pending/{{ill_role}}" i18n>Pending Requests</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
           <ff-ill-requests [contextOrg]="contextOrg" [ill_role]="ill_role"/>
@@ -45,7 +45,7 @@
       </li>
 
       <li ngbNavItem="incoming">
-        <button ngbNavLink routerLink="/staff/ill/incoming/{{ill_role}}" i18n>Incoming Transits</button>
+        <a ngbNavLink routerLink="/staff/ill/incoming/{{ill_role}}" i18n>Incoming Transits</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Incoming Transits"></eg-title>
           <ff-transits [contextOrg]="contextOrg" direction="incoming" [ill_role]="ill_role"/>
@@ -53,7 +53,7 @@
       </li>
 
       <li ngbNavItem="outgoing">
-        <button ngbNavLink routerLink="/staff/ill/outgoing/{{ill_role}}" i18n>Outgoing Transits</button>
+        <a ngbNavLink routerLink="/staff/ill/outgoing/{{ill_role}}" i18n>Outgoing Transits</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Outgoing Transits"></eg-title>
           <ff-transits [contextOrg]="contextOrg" direction="outgoing" [ill_role]="ill_role"/>
@@ -61,7 +61,7 @@
       </li>
 
       <li role="presentation" ngbNavItem="onshelf" class='nav-item'>
-        <button ngbNavLink routerLink="/staff/ill/onshelf/{{ill_role}}" i18n>On Shelf</button>
+        <a ngbNavLink routerLink="/staff/ill/onshelf/{{ill_role}}" i18n>On Shelf</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
           <ff-ill-onshelf [contextOrg]="contextOrg" [ill_role]="ill_role"/>
@@ -69,7 +69,7 @@
       </li>
 
       <li ngbNavItem="circulating">
-        <button ngbNavLink routerLink="/staff/ill/circulating/{{ill_role}}" i18n>Currently Circulating</button>
+        <a ngbNavLink routerLink="/staff/ill/circulating/{{ill_role}}" i18n>Currently Circulating</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Currently Circulating"></eg-title>
           <ff-ill-circulating [contextOrg]="contextOrg" [ill_role]="ill_role"/>
