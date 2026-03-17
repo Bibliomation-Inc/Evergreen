@@ -1,5 +1,5 @@
 [% IF ctx.saved_searches.size %]
-
+<!--
     <div class="saved-searches-header">
         <div class="text">
             [% l("Recent searches") %]
@@ -23,4 +23,5 @@
         [% END %]
     [% END %]
     </div>
+-->
 [% END %]
