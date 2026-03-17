@@ -69,11 +69,11 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
             return Promise.resolve(true); // if optional thing is 'circ', skip unless there is an open circ
         }
 
-        if (thing == 'hold' && !this.getDispositionDetails().open_hold) {
+        if (thing == 'hold' && !this.disposition.open_hold) {
             return Promise.resolve(true); // if optional thing is 'hold', skip unless there is an open hold
         }
 
-        if (thing == 'transit' && !this.dispositionDetails.open_transit) {
+        if (thing == 'transit' && !this.disposition.open_transit) {
             return Promise.resolve(true); // if optional thing is 'transit', skip unless there is an open transit
         }
 
@@ -93,8 +93,8 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
         const old = this.swap_dispo(active_dispo);
 
         this.disallowDialog.barcode = this.disposition.copy.barcode();
-        this.disallowDialog.willCancelTransit = this.dispositionDetails.open_transit;
-        this.disallowDialog.currentlyTargeted = this.dispositionDetails.open_hold;
+        this.disallowDialog.willCancelTransit = this.disposition.open_transit;
+        this.disallowDialog.currentlyTargeted = this.disposition.open_hold;
 
         const result = await lastValueFrom(
             this.disallowDialog.open().pipe(
@@ -105,7 +105,7 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
         if (!result.rejected) {
             const block_scope = result.blockAll ? 'block_all' : 'block_one';
 
-            if (this.dispositionDetails.open_transit) {
+            if (this.disposition.open_transit) {
                 return this.abort_transit().then(() => this[block_scope](result.blockReason));
             } else {
                 return this[block_scope](result.blockReason);

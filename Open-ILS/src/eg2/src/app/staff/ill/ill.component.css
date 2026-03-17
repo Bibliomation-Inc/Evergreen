@@ -33,7 +33,6 @@ table.table.eg-grid > :not(caption) > tbody > tr.eg-grid-row {
   grid-template-columns: min-content 2fr;
   grid-template-rows: minmax(0, auto);
   grid-template-areas:
-    "nav summary"
     "nav data";
 }
 
@@ -77,11 +76,11 @@ table.table.eg-grid > :not(caption) > tbody > tr.eg-grid-row {
   fill: var(--primary);
 }
 
-.show-nav #ill-nav .nav-tabs {
+.show-nav #ill-nav .nav-pills {
   position: static;
 }
 
-#ill-nav .nav-tabs {
+#ill-nav .nav-pills {
   border-bottom: none;
   position: absolute;
   left: -9999px;

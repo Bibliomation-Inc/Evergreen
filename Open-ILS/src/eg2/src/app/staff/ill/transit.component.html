@@ -18,12 +18,10 @@
   </a>
 </ng-template>
 
-<ul ngbNav #transitNav="ngbNav" class="nav-tabs"
-    [activeId]="ill_role" [keyboard]="true" (navChange)="beforeTabChange($event)"
-    [roles]="false" role="tablist">
+<ul ngbNav #transitNav="ngbNav" class="nav-tabs" [activeId]="ill_role" [keyboard]="false" (navChange)="beforeTabChange($event)">
 
-  <li role="presentation" ngbNavItem="borrower">
-    <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)">{{linkLabels.borrower}}</a>
+  <li ngbNavItem="borrower">
+    <a ngbNavLink (click)="navItemClick('borrower', $event)">{{linkLabels.borrower}}</a>
     <ng-template ngbNavContent>
       <eg-admin-page idlClass="atc" pageSize="25"
         persistKey="ff.ill.{{direction}}_transit.borrower"
@@ -44,8 +42,8 @@
     </ng-template>
   </li>
 
-  <li role="presentation" ngbNavItem="lender">
-    <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)">{{linkLabels.lender}}</a>
+  <li ngbNavItem="lender">
+    <a ngbNavLink (click)="navItemClick('lender', $event)">{{linkLabels.lender}}</a>
     <ng-template ngbNavContent>
       <eg-admin-page idlClass="atc" pageSize="25"
         persistKey="ff.ill.{{direction}}_transit.lender"

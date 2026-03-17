@@ -1,11 +1,8 @@
 <ff-disallow-item #disallowDialog/>
 
-<ul ngbNav #holdsNav="ngbNav" class="nav-tabs"
-    [activeId]="ill_role" [keyboard]="true" (navChange)="beforeTabChange($event)"
-    [roles]="false" role="tablist">
-
-  <li role="presentation" ngbNavItem="borrower">
-    <a role="tab" ngbNavLink (click)="navItemClick('borrower', $event)" i18n>Requests By My Patrons</a>
+<ul ngbNav #holdsNav="ngbNav" class="nav-tabs" [activeId]="ill_role" (navChange)="beforeTabChange($event)" [keyboard]="false">
+  <li ngbNavItem="borrower">
+    <a ngbNavLink (click)="navItemClick('borrower', $event)" i18n>Requests By My Patrons</a>
     <ng-template ngbNavContent>
       <eg-holds-grid pageSize="25"
         persistKey="ff.ill.pending.borrower"
@@ -25,8 +22,8 @@
     </ng-template>
   </li>
 
-  <li role="presentation" ngbNavItem="lender">
-    <a role="tab" ngbNavLink (click)="navItemClick('lender', $event)" i18n>Requests From Other Libraries</a>
+  <li ngbNavItem="lender">
+    <a ngbNavLink (click)="navItemClick('lender', $event)" i18n>Requests From Other Libraries</a>
     <ng-template ngbNavContent>
       <eg-holds-grid pageSize="25"
         persistKey="ff.ill.pending.lender"
