@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, ParamMap} from '@angular/router';
+import {Router, ActivatedRoute, ParamMap} from '@angular/router';
 import {ILLModule} from './ill.module';
 import {NgbNav, NgbNavChangeEvent} from '@ng-bootstrap/ng-bootstrap';
 import {filter, pairwise} from 'rxjs';
@@ -20,12 +20,14 @@ export class ILLComponent implements OnInit {
     activeTab: string;
     ill_role = 'borrower';
     route_barcode: string;
+    jumpLink: string;
     contextOrg: number;
 
     showNav = true;
     statusMode = false;
 
     constructor(
+        private router: Router,
         private route: ActivatedRoute,
         private auth: AuthService,
         private store: StoreService
@@ -69,5 +71,12 @@ export class ILLComponent implements OnInit {
         this.showNav = !this.showNav;
     }
 
+    activateJumpLink() {
+        if (!this.jumpLink) {
+            return;
+        }
+
+        this.router.navigate([`/staff/ill/${this.jumpLink}`]);
+    }
 }
 

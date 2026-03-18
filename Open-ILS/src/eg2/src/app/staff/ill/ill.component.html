@@ -1,5 +1,50 @@
 <eg-staff-banner bannerText="ILL Management" i18n-bannerText></eg-staff-banner>
 
+<div class="row">
+  <div class="col-lg-9"></div>
+  <div class="col-lg-3">
+    <div class="input-group">
+      <label class="input-group-text" i18n for="jumpLinkSelect">Jump to page:</label>
+      <select class="form-control"
+        id="jumpLinkSelect"
+        [(ngModel)]="jumpLink"
+        i18n-aria-label aria-label="Jump to page"
+        (keydown.enter)="activateJumpLink()" >
+        <option value="singlescan" i18n>Single Scan</option>
+        <optgroup i18n-label label="Pending Requests">
+            <option value="pending/borrower" i18n>By My Patrons</option>
+            <option value="pending/lender" i18n>From Other Libraries</option>
+        </optgroup>
+        <optgroup i18n-label label="Incoming Transits">
+            <option value="incoming/borrower" i18n>For My Patrons Requests</option>
+            <option value="incoming/lender" i18n>Returning From Other Libraries</option>
+        </optgroup>
+        <optgroup i18n-label label="Outgoing Transits">
+            <option value="outgoing/borrower" i18n>Returns to Other Libraries</option>
+            <option value="outgoing/lender" i18n>ILLs For Other Libraries</option>
+        </optgroup>
+        <optgroup i18n-label label="On Shelf">
+            <option value="onshelf/borrower" i18n>For My Patrons</option>
+            <option value="onshelf/lender" i18n>At Other Libraries</option>
+        </optgroup>
+        <optgroup i18n-label label="Currently Circulating">
+            <option value="circulating/borrower" i18n>To My Patrons</option>
+            <option value="circulating/lender" i18n>At Other Libraries</option>
+        </optgroup>
+      </select>
+      <button type="button" class="btn btn-outline-dark"
+        (keydown.enter)="activateJumpLink()" [disabled]="!jumpLink"
+        (click)="activateJumpLink()" i18n>Go!</button>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-9"></div>
+  <div class="col-lg-3 justify-content-end d-flex">
+    <a role="link" class="nav-link" target="_blank" href="/eg/opac" i18n>Search the catalog</a>
+  </div>
+</div>
+
 <div id="ill-grid" [ngClass]="{'show-nav': showNav}"
   role="region" aria-label="ILL Management" i18n-aria-label>
 
@@ -8,15 +53,12 @@
       class="nav-link btn btn-sm svg-icon-button ill-nav-toggle"
       [title]="showNav ? 'Hide Navigation' : 'Show Navigation'" i18n-title
       [attr.aria-label]="showNav ? 'Hide Navigation' : 'Show Navigation'" i18n-aria-label>
-      <!-- Our Material Icons set is missing some icons. Using SVG: -->
       <span class="mat-icon-in-button" aria-hidden="true">
-        <!-- left_panel_open in SVG -->
         <ng-container *ngIf="showNav">
           <svg xmlns="http://www.w3.org/2000/svg" role="img" height="24" viewBox="0 -960 960 960" width="24">
             <path d="M500-640v320l160-160-160-160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm120-80v-560H200v560h120Zm80 0h360v-560H400v560Zm-80 0H200h120Z"/>
           </svg>
         </ng-container>
-        <!-- left_panel_close in SVG -->
         <ng-container *ngIf="!showNav">
           <svg xmlns="http://www.w3.org/2000/svg" role="img" height="24" viewBox="0 -960 960 960" width="24">
             <path d="M660-320v-320L500-480l160 160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm120-80v-560H200v560h120Zm80 0h360v-560H400v560Zm-80 0H200h120Z"/>
@@ -74,12 +116,6 @@
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Currently Circulating"></eg-title>
           <ff-ill-circulating [contextOrg]="contextOrg" [ill_role]="ill_role"/>
         </ng-template>
-      </li>
-
-      <li class='nav-item'>
-        <div class="ms-1 mt-3">
-          <a role="link" class="nav-link" target="_blank" href="/eg/opac" i18n>Search the catalog</a>
-        </div>
       </li>
 
     </ul>
