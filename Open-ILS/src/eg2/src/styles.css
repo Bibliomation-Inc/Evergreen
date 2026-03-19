@@ -619,7 +619,7 @@ button.input-group-text.text-danger {
 }
 
 .btn:is(:hover, :focus, :focus-visible) {
-  box-shadow: 0 0 0 .25rem rgba(var(--bs-blue-600-rgb), .25);
+  box-shadow: 0 0 0 .25rem rgba(var(--bs-blue-600-rgb), .5);
 }
 
 .btn.btn-secondary {
@@ -866,7 +866,7 @@ button.input-group-text.text-danger {
   color: var(--destroy-color);
   background-color: var(--bs-body-bg-highlight);
   border: 1px solid var(--danger-border);
-  box-shadow: 0 0 0 .25rem rgba(var(--bs-red-rgb), .25);
+  box-shadow: 0 0 0 .25rem rgba(var(--bs-red-rgb), .5);
 }
 
 .btn-destroy:active {
@@ -885,7 +885,7 @@ button.input-group-text.text-danger {
   color: var(--destroy-color);
   background-color: transparent;
   border: 1px solid var(--danger-border);
-  box-shadow: 0 0 0 .25rem rgba(var(--bs-red-rgb), .25);
+  box-shadow: 0 0 0 .25rem rgba(var(--bs-red-rgb), .5);
 }
 
 .btn-outline-destroy:active {
