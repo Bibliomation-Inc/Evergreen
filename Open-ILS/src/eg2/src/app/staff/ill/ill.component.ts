@@ -20,7 +20,7 @@ export class ILLComponent implements OnInit {
     activeTab: string;
     ill_role = 'borrower';
     route_barcode: string;
-    jumpLink: string;
+    jumpLink = '';
     contextOrg: number;
 
     showNav = true;
