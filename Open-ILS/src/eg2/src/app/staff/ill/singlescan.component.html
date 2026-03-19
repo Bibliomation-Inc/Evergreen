@@ -4,7 +4,7 @@
   <div class="row form-inline">
     <div class="col-lg-4 d-flex">
       <div class="input-group">
-        <span class="input-group-text" i18n>Barcode</span>
+        <label for="sstsBarcodeInput" class="input-group-text" i18n>Scan Item Barcode</label>
         <input type="text" class="form-control" id="sstsBarcodeInput"
           [(ngModel)]="barcode" (focus)="$event.target.select()"
           i18n-aria-label aria-label="Barcode Input" (keydown.enter)="takeBarcode()" />

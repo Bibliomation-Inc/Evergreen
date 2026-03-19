@@ -10,6 +10,7 @@
         [(ngModel)]="jumpLink"
         i18n-aria-label aria-label="Jump to page"
         (keydown.enter)="activateJumpLink()" >
+        <option value="" i18n>Select page</option>
         <option value="singlescan" i18n>Single Scan</option>
         <optgroup i18n-label label="Pending Requests">
             <option value="pending/borrower" i18n>By My Patrons</option>
@@ -45,10 +46,11 @@
   </div>
 </div>
 
-<div id="ill-grid" [ngClass]="{'show-nav': showNav}"
+<div id="ill-grid" class="show-nav"
   role="region" aria-label="ILL Management" i18n-aria-label>
 
   <nav id="ill-nav" aria-label="ILL Management Actions" i18n-aria-label>
+    <!-- Just hide this, not needed
     <button type="button" (click)="toggleNavPane()"
       class="nav-link btn btn-sm svg-icon-button ill-nav-toggle"
       [title]="showNav ? 'Hide Navigation' : 'Show Navigation'" i18n-title
@@ -66,7 +68,8 @@
         </ng-container>
       </span>
     </button>
-    
+    -->
+
     <ul ngbNav #illNav="ngbNav" class="nav-pills flex-column"
       orientation="vertical" [activeId]="activeTab" [keyboard]="false">
 
