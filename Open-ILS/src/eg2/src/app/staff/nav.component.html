@@ -9,7 +9,7 @@
 <div class="container-fluid">
     <a class="navbar-brand nav-link with-material-icon nav-link-home" 
     routerLinkActive="active" ariaCurrentWhenActive="page" [routerLink]="getHomeLink()" (click)="closeDropdowns"
-    aria-label="Home" i18n-aria-label="Home button aria label@@navbar-home-button-aria-label"
+    aria-label="Home" i18n-aria-label
     egAccessKey keyCtx="navbar" i18n-keySpec i18n-keyDesc
     keySpec="alt+h" keyDesc="Navigate Home">
     <span class="material-icons" aria-hidden="true" title="Home: Alt+H">home</span>
@@ -861,19 +861,20 @@
         </div>
       </div>
     </div>
+
     <div class="navbar-nav" [ngClass]="{'ms-auto': !user()}">
       <div ngbDropdown class="nav-item dropdown color-mode-toggle" display="dynamic">
         <button type="button" ngbDropdownToggle class="nav-link dropdown-toggle with-material-icon">
           <ng-container *ngIf="colorMode === 'light'">
-            <span class="material-icons" aria-hidden="true">light_mode</span>
+            <span class="material-icons" title="Current color mode: Light" i18n-title aria-hidden="true">light_mode</span>
             <span class="visually-hidden" i18n>Current color mode: Light</span>
           </ng-container>
           <ng-container *ngIf="colorMode === 'dark'">
-            <span class="material-icons" aria-hidden="true">nightlight</span>
+            <span class="material-icons" title="Current color mode: Dark" i18n-title aria-hidden="true">nightlight</span>
             <span class="visually-hidden" i18n>Current color mode: Dark</span>
           </ng-container>
           <ng-container *ngIf="!colorMode || colorMode === 'auto'">
-            <span class="material-icons" aria-hidden="true">brightness_medium</span>
+            <span class="material-icons" title="Current color mode: Auto" i18n-title aria-hidden="true">brightness_medium</span>
             <span class="visually-hidden" i18n>Current color mode: Auto</span>
           </ng-container>
         </button>
@@ -896,6 +897,7 @@
         </div>
       </div>
     </div>
+
     <div class="navbar-nav" *ngIf="user()">
       <div ngbDropdown class="dropdown-menu" 
         class="nav-item" display="dynamic">
