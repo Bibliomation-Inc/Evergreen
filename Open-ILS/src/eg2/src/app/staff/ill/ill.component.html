@@ -46,10 +46,10 @@
   </div>
 </div>
 
-<div id="ill-grid" class="show-nav"
+<div id="ill-grid-row" class="row show-nav"
   role="region" aria-label="ILL Management" i18n-aria-label>
 
-  <nav id="ill-nav" aria-label="ILL Management Actions" i18n-aria-label>
+  <nav id="ill-nav-col" class="col-lg-2" aria-label="ILL Management Actions" i18n-aria-label>
     <!-- Just hide this, not needed
     <button type="button" (click)="toggleNavPane()"
       class="nav-link btn btn-sm svg-icon-button ill-nav-toggle"
@@ -125,7 +125,7 @@
   </nav>  
 
 
-  <div id="ill-tabs">
+  <div id="ill-tabs-col" class="col-lg-10">
     <div [ngbNavOutlet]="illNav"></div>
   </div>
   
