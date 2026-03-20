@@ -310,7 +310,7 @@ td.eg-grid-col-sorted {
   position: absolute;
   top: 0;
   right: 0;
-  width: 2ch;
+  width: 24px;
   height: 100%;
   cursor: col-resize;
 }
