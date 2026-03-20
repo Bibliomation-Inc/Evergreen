@@ -86,7 +86,8 @@
   </div>
   <div class="btn-group">
     <ng-container *ngIf="!gridContext.disableSelect">
-      <div ngbDropdown autoClose="false" class="btn-group" placement="bottom-right">
+      <div ngbDropdown autoClose="false" class="btn-group" placement="bottom-right"
+        (openChange)="gridContext.resizeWrapper = !gridContext.resizeWrapper">
         <button ngbDropdownToggle type="button" [disabled]="!gridContext.toolbarActions.length"
           title="Actions For {{gridContext.getSelectedRows().length}} Selected Rows" i18n-title
           class="btn btn-outline-dark btn-sm  no-dropdown-caret" i18n>
@@ -115,7 +116,8 @@
         class="btn btn-outline-dark btn-sm" (click)="gridContext.pager.increment()">
         <span class="material-icons mat-icon-in-button" aria-hidden="true">keyboard_arrow_right</span>
       </button>
-      <div ngbDropdown class="btn-group" placement="bottom-right">
+      <div ngbDropdown class="btn-group" placement="bottom-right"
+        (openChange)="gridContext.resizeWrapper = !gridContext.resizeWrapper">
         <button ngbDropdownToggle type="button" class="btn btn-outline-dark btn-sm">
           <span title="Select Row Count" i18n-title i18n>
             Rows {{gridContext.pager.limit}}
