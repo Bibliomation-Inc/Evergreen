@@ -1116,20 +1116,16 @@ export class GridContext {
             const str = this.cellTextGenerator[col.name](row);
             return (str === null || str === undefined)  ? '' : str;
         } else {
-            if (col.cellTemplate) {
-                return ''; // avoid 'undefined' values
-            } else {
-                const str = this.getRowColumnValue(row, col);
-                switch (col.name) {
-                    case 'name':
-                    case 'url':
-                    case 'email':
-                        // TODO: insert <wbr> around punctuation
-                        break;
-                    default: break;
-                }
-                return str;
+            const str = this.getRowColumnValue(row, col) || '';
+            switch (col.name) {
+                case 'name':
+                case 'url':
+                case 'email':
+                    // TODO: insert <wbr> around punctuation
+                    break;
+                default: break;
             }
+            return str;
         }
     }
 
