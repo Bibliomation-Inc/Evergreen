@@ -19,7 +19,7 @@
 
 <div class="row m-0">
   <div class="col m-0 p-1" style="overflow-x: auto;">
-    
+
 <!-- tabindex so the grid can capture keyboard events -->
 <table #egGrid role="grid" tabindex="-1" (keydown)="onGridKeyDown($event)"
   class="eg-grid table grid-key-{{persistKey ? persistKey.replaceAll('.', '_') : 'none'}}"
@@ -57,7 +57,7 @@
             [ngClass]="{'eg-grid-col-sorted': context.isColumnSorting(col, 'ASC') || context.isColumnSorting(col, 'DESC')}">
         </colgroup>
         
-        <thead class="eg-grid-header" #egGridStickyHeader [context]="context" [ngClass]="{'eg-grid-sticky-header' : context.stickyGridHeader}" role="rowgroup">  </thead>
+        <thead class="eg-grid-header" #egGridStickyHeader [context]="context" [ngClass]="{'XXX-eg-grid-sticky-header' : context.stickyGridHeader}" role="rowgroup">  </thead>
         <tbody class="eg-grid-body" [context]="context" role="rowgroup"></tbody>
     </table>
   </div>
