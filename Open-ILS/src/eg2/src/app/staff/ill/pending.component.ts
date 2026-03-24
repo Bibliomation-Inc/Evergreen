@@ -58,6 +58,15 @@ export class PendingRequestsComponent implements OnInit {
     // control-click on the links does not open them in a new tab.
     // Mouse middle-click does, though.  *shrug*
     navItemClick(tab: string, evt: PointerEvent) {
+        if (this.ill_role === 'borrower' && tab === 'lender') {
+            this.customActions.push({
+                group: 'ILL',
+                label: $localize`Disallow Request`,
+                method: (rows) => this.popup_block_ill(rows)
+            });
+        } else if (this.ill_role === 'lender' && tab === 'borrower') {
+            this.customActions.pop();
+        }
         evt.preventDefault();
         this.routeToTab(tab, evt.ctrlKey);
     }
