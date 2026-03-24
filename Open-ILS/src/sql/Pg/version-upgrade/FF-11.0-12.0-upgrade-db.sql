@@ -19320,6 +19320,95 @@ CREATE OR REPLACE FUNCTION actor.org_unit_ancestor_at_depth ( INT,INT ) RETURNS 
             );
 $$ LANGUAGE SQL STABLE;
 
+CREATE OR REPLACE FUNCTION permission.usr_has_perm_at_nd(user_id integer, perm_code text)
+ RETURNS SETOF integer
+ LANGUAGE plpgsql
+ STABLE ROWS 1
+AS $function$
+--
+-- Return a set of all the org units for which a given user has a given
+-- permission, granted directly (not through inheritance from a parent
+-- org unit).
+--
+-- The permissions apply to a minimum depth of the org unit hierarchy,
+-- for the org unit(s) to which the user is assigned.  (They also apply
+-- to the subordinates of those org units, but we don't report the
+-- subordinates here.)
+--
+-- For purposes of this function, the permission.usr_work_ou_map table
+-- defines which users belong to which org units.  I.e. we ignore the
+-- home_ou column of actor.usr.
+--
+DECLARE
+    b_super       BOOLEAN;
+    n_perm        INTEGER;
+    n_min_depth   INTEGER;
+BEGIN
+    --
+    -- Check for superuser
+    --
+    SELECT super_user INTO b_super FROM actor.usr WHERE id = user_id;
+
+    IF NOT FOUND THEN
+        RETURN;             -- No user?  No permissions.
+    ELSIF b_super THEN
+        -- Super user has all permissions everywhere
+        RETURN QUERY SELECT id FROM actor.org_unit WHERE parent_ou IS NULL;
+        RETURN;
+    END IF;
+
+    -- Translate the permission name to a numeric permission id
+    SELECT id INTO n_perm FROM permission.perm_list WHERE code = perm_code;
+
+    IF NOT FOUND THEN
+        RETURN;               -- No such permission
+    END IF;
+
+    -- Find the highest-level org unit (i.e. the minimum depth)
+    -- to which the permission is applied for this user
+    --
+    -- This query is modified from the one in permission.usr_perms().
+    SELECT INTO n_min_depth
+        min( depth )
+    FROM    (
+        SELECT depth
+          FROM permission.usr_perm_map upm
+         WHERE upm.usr = user_id
+           AND (upm.perm = n_perm OR upm.perm = -1)
+                    UNION
+        SELECT  gpm.depth
+          FROM  permission.grp_perm_map gpm
+          WHERE (gpm.perm = n_perm OR gpm.perm = -1)
+            AND gpm.grp IN (
+               SELECT   (permission.grp_ancestors(
+                    (SELECT profile FROM actor.usr WHERE id = user_id)
+                )).id
+            )
+                    UNION
+        SELECT  p.depth
+          FROM  permission.grp_perm_map p
+          WHERE (p.perm = n_perm OR p.perm = -1)
+            AND p.grp IN (
+                SELECT (permission.grp_ancestors(m.grp)).id
+                FROM   permission.usr_grp_map m
+                WHERE  m.usr = user_id
+            )
+    ) AS x;
+
+    IF NOT FOUND THEN
+        RETURN;                -- No such permission for this user
+    END IF;
+
+    RETURN QUERY
+        SELECT  DISTINCT d.id
+          FROM  permission.usr_work_ou_map m,
+                actor.org_unit_ancestor_at_depth(m.work_ou, n_min_depth) d
+          WHERE m.usr = user_id;
+
+    RETURN;
+END;
+$function$;
+
 DELETE FROM config.ui_staff_portal_page_entry;
 
 INSERT INTO config.ui_staff_portal_page_entry
