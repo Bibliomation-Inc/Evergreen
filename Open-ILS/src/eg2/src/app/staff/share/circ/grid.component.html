@@ -21,13 +21,15 @@
 
 <ng-template #titleTemplate let-r="row">
   <ng-container *ngIf="r.record">
-    <a routerLink="/staff/catalog/record/{{r.record.id()}}">{{r.title}}</a>
+    <a *ngIf="!illMode" routerLink="/staff/catalog/record/{{r.record.id()}}">{{r.title}}</a>
+    <a *ngIf="illMode" href="/eg/staff/cat/catalog/record/{{r.record.id()}}">{{r.title}}</a>
   </ng-container>
   <ng-container *ngIf="!r.record">{{r.title}}</ng-container>
 </ng-template>
 <ng-template #barcodeTemplate let-r="row">
   <ng-container *ngIf="r.copy">
-    <a href="/eg/staff/cat/item/{{r.copy.id()}}">{{r.copy.barcode()}}</a>
+    <a *ngIf="!illMode" href="/eg/staff/cat/item/{{r.copy.id()}}">{{r.copy.barcode()}}</a>
+    <a *ngIf="illMode" routerLink="/staff/ill/singlescan/{{r.copy.barcode()}}">{{r.copy.barcode()}}</a>
   </ng-container>
 </ng-template>
 
@@ -35,74 +37,88 @@
 <eg-grid #circGrid [dataSource]="gridDataSource" [sortable]="true"
   [rowFlairIsEnabled]="true" [rowFlairCallback]="rowFlair"
   [rowClassCallback]="rowClass" [persistKey]="persistKey"
+  [showFields]="showFields" [pageSize]="pageSize" [defaultDatePlusTime]="defaultDatePlusTime"
   [useLocalSort]="true" [cellTextGenerator]="cellTextGenerator">
 
   <ng-container *ngIf="menuStyle === 'full'">
 
-    <eg-grid-toolbar-action
+    <ng-container *ngFor="let cb of customButtons">
+      <eg-grid-toolbar-button label="{{cb.label}}"
+        (onClick)="customMethodCallback(cb.method, $event)">
+      </eg-grid-toolbar-button>
+    </ng-container>
+
+    <ng-container *ngFor="let ca of customActions">
+      <eg-grid-toolbar-action label="{{ca.label}}"
+        [group]="ca.group"
+        (onClick)="customMethodCallback(ca.method, $event)">
+      </eg-grid-toolbar-action>
+    </ng-container>
+
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-label label="Print Item Receipt(s)" (onClick)="printReceipts($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-group group="Add" i18n-label label="Add Item Alerts"
       (onClick)="openItemAlerts($event, 'create')">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-group group="Add" i18n-label label="Manage Item Alerts"
       (onClick)="openItemAlerts($event, 'manage')">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-group group="Add" i18n-label label="Add Billing"
       (onClick)="openBillingDialog($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       i18n-group group="Circulation" i18n-label label="Edit Due Date"
       (onClick)="editDueDate($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       group="Mark" i18n-group i18n-label label="Mark Item Damaged"
       (onClick)="markDamaged($event)"></eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       group="Mark" i18n-group i18n-label label="Mark Claims Returned"
       (onClick)="claimsReturned($event)"></eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode"
       group="Mark" i18n-group i18n-label label="Mark Claims Never Checked Out"
       (onClick)="claimsNeverCheckedOut($event)"></eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action
+    <eg-grid-toolbar-action *ngIf="!illMode || ill_role=='borrower'"
       group="Mark" i18n-group i18n-label label="Mark Lost (By Patron)"
       (onClick)="markLost($event)"></eg-grid-toolbar-action>
 
     <!-- .subscribe() nudges the observable to run -->
-    <eg-grid-toolbar-action 
-      group="Circulation" i18n-group i18n-label label="Check In" 
+    <eg-grid-toolbar-action *ngIf="!illMode || ill_role=='borrower'"
+      group="Circulation" i18n-group i18n-label label="Check Item In" 
       (onClick)="checkin($event).subscribe()">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Circulation" i18n-group 
+    <eg-grid-toolbar-action group="Circulation" i18n-group *ngIf="!illMode"
       i18n-label label="Renew" (onClick)="renew($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Circulation" i18n-group 
+    <eg-grid-toolbar-action group="Circulation" i18n-group *ngIf="!illMode"
       i18n-label label="Renew All" (onClick)="renewAll()">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Circulation" i18n-group 
+    <eg-grid-toolbar-action group="Circulation" i18n-group *ngIf="!illMode"
       i18n-label label="Renew With Specific Due Date"
       (onClick)="renewWithDate($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Show" i18n-group 
+    <eg-grid-toolbar-action group="Show" i18n-group *ngIf="!illMode"
       i18n-label label="Show Last Few Circulation" (onClick)="showRecentCircs($event)">
     </eg-grid-toolbar-action>
 
-    <eg-grid-toolbar-action group="Show" i18n-group 
+    <eg-grid-toolbar-action group="Show" i18n-group *ngIf="!illMode"
       i18n-label label="Show Triggered Events" (onClick)="showTriggeredEvents($event)">
     </eg-grid-toolbar-action>
 
@@ -113,7 +129,7 @@
   <eg-grid-column [index]="true" path="index" [hidden]="true"
     label="Row Index" i18n-label></eg-grid-column>
 
-  <eg-grid-column path="circ.id" 
+  <eg-grid-column path="circ.id"
     label="Circ ID" i18n-label></eg-grid-column>
 
   <eg-grid-column path="dueDate" label="Due Date" i18n-label
@@ -121,10 +137,12 @@
     datatype="timestamp"></eg-grid-column>
 
   <eg-grid-column path="copy.barcode" label="Barcode" i18n-label
-    [cellTemplate]="barcodeTemplate"></eg-grid-column>
+    [sortable]="false" [cellTemplate]="barcodeTemplate"></eg-grid-column>
 
-  <eg-grid-column path="title" label="Title" i18n-label 
-    [cellTemplate]="titleTemplate"></eg-grid-column>
+  <eg-grid-column path="copy.circ_lib.shortname" label="Copy Library" i18n-label/>
+
+  <eg-grid-column path="title" label="Title" i18n-label
+    [sortable]="false" [cellTemplate]="titleTemplate"></eg-grid-column>
 
   <eg-grid-column path="circ.stop_fines" label="Fines Stopped"
     i18n-label></eg-grid-column>
@@ -149,6 +167,10 @@
 
   <eg-grid-column path="nonCatCount" label="Non-Cataloged Count"
     [hidden]="true" i18n-label></eg-grid-column>
+
+  <eg-grid-column path="circ.usr.fist_given_name" [hidden]="true"></eg-grid-column>
+
+  <eg-grid-column label="Patron Barcode" i18n-label path="circ.usr.card.barcode" [hidden]="true"></eg-grid-column>
 
   <eg-grid-column path="circ.*" idlClass="circ" [hidden]="true"></eg-grid-column>
 

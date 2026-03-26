@@ -72,6 +72,7 @@ CREATE TABLE asset.copy_location_group_map (
 CREATE TABLE asset.copy (
 	id		BIGSERIAL			PRIMARY KEY,
 	circ_lib	INT				NOT NULL REFERENCES actor.org_unit (id) DEFERRABLE INITIALLY DEFERRED,
+    source_lib  INT             NOT NULL REFERENCES actor.org_unit (id) DEFERRABLE INITIALLY DEFERRED,
 	creator		BIGINT				NOT NULL,
 	call_number	BIGINT				NOT NULL,
 	editor		BIGINT				NOT NULL,
@@ -104,14 +105,25 @@ CREATE TABLE asset.copy (
 	mint_condition      BOOL        NOT NULL DEFAULT TRUE,
     cost    NUMERIC(8,2)
 );
-CREATE UNIQUE INDEX copy_barcode_key ON asset.copy (barcode) WHERE deleted = FALSE OR deleted IS FALSE;
+CREATE UNIQUE INDEX copy_barcode_key ON asset.copy (barcode, source_lib) WHERE deleted = FALSE OR deleted IS FALSE;
 CREATE INDEX cp_cn_idx ON asset.copy (call_number);
 CREATE INDEX cp_avail_cn_idx ON asset.copy (call_number);
 CREATE INDEX cp_creator_idx  ON asset.copy ( creator );
 CREATE INDEX cp_editor_idx   ON asset.copy ( editor );
 CREATE INDEX cp_create_date  ON asset.copy (create_date);
 CREATE INDEX cp_extant_by_circ_lib_idx ON asset.copy(circ_lib) WHERE deleted = FALSE OR deleted IS FALSE;
-CREATE RULE protect_copy_delete AS ON DELETE TO asset.copy DO INSTEAD UPDATE asset.copy SET deleted = TRUE WHERE OLD.id = asset.copy.id RETURNING *;
+SELECT evergreen.setup_delete_protect_rule('asset','copy');
+
+CREATE OR REPLACE FUNCTION asset.force_source_lib () RETURNS TRIGGER AS $$
+BEGIN
+    NEW.source_lib := COALESCE(NEW.source_lib, NEW.circ_lib);
+    RETURN NEW;
+END;
+$$ LANGUAGE PLPGSQL;
+
+CREATE TRIGGER force_source_lib_tgr
+    BEFORE INSERT ON asset.copy FOR EACH ROW
+    EXECUTE PROCEDURE asset.force_source_lib();
 
 CREATE TABLE asset.copy_part_map (
     id          SERIAL  PRIMARY KEY,
@@ -500,7 +512,7 @@ CREATE INDEX asset_call_number_upper_label_id_owning_lib_idx ON asset.call_numbe
 CREATE INDEX asset_call_number_label_sortkey ON asset.call_number(oils_text_as_bytea(label_sortkey));
 CREATE UNIQUE INDEX asset_call_number_label_once_per_lib ON asset.call_number (record, owning_lib, label, prefix, suffix) WHERE deleted = FALSE OR deleted IS FALSE;
 CREATE INDEX asset_call_number_label_sortkey_browse ON asset.call_number(oils_text_as_bytea(label_sortkey), oils_text_as_bytea(label), id, owning_lib) WHERE deleted IS FALSE OR deleted = FALSE;
-CREATE RULE protect_cn_delete AS ON DELETE TO asset.call_number DO INSTEAD UPDATE asset.call_number SET deleted = TRUE WHERE OLD.id = asset.call_number.id RETURNING *;
+SELECT evergreen.setup_delete_protect_rule('asset','call_number');
 CREATE TRIGGER protect_acn_id_neg1
   BEFORE UPDATE ON asset.call_number
   FOR EACH ROW WHEN (OLD.id = -1)
@@ -755,6 +767,8 @@ $f$ LANGUAGE PLPGSQL;
 
 
 CREATE OR REPLACE FUNCTION asset.record_has_holdable_copy ( rid BIGINT, ou INT DEFAULT NULL) RETURNS BOOL AS $f$
+DECLARE
+    ous INT[] := (SELECT array_agg(id) FROM actor.org_unit_descendants(COALESCE(ou, (SELECT id FROM evergreen.org_top()))));
 BEGIN
     PERFORM 1
         FROM
@@ -769,7 +783,7 @@ BEGIN
             AND ccs.holdable = true
             AND acp.deleted = false
             AND acpl.deleted = false
-            AND acp.circ_lib IN (SELECT id FROM actor.org_unit_descendants(COALESCE($2,(SELECT id FROM evergreen.org_top()))))
+            AND acp.circ_lib = ANY(ous)
         LIMIT 1;
     IF FOUND THEN
         RETURN true;

@@ -1,0 +1,40 @@
+<ng-template #dialogContent>
+  <div class="modal-header">
+    <h4 class="modal-title" i18n>Disallow item for ILL</h4>
+    <button type="button" class="btn-close btn-close-white"
+      i18n-aria-label aria-label="Close dialog" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
+    <h5 i18n>Block item {{barcode}} for ILL use</h5>
+    <div *ngIf="willCancelTransit" class="alert alert-warning" i18n>Blocking this item will cancel an active transit</div>
+
+    <div class="row mt-2">
+      <div class="col-lg-3 fw-bold" i18n>Block Reason</div>
+      <div class="col-lg-9">
+        <select class="form-select w-auto" id="blockReason" [(ngModel)]="blockReason">
+          <option i18n value="policy">Policy</option>
+          <option i18n value="not found">Targeted Copy or Equivalent Not Found</option>
+          <option i18n value="incorrect target">Incorrectly Targeted or Incorrect Copy</option>
+          <option i18n value="other">Other Reasons</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-lg-3 fw-bold" i18n>Block Scope</div>
+      <div class="col-lg-9">
+        <input class="form-check-input" type="checkbox"
+          [disabled]="!currentlyTargeted" id="block-all-cbox" [(ngModel)]="blockAll"/>
+        <label class="ms-2 form-label form-check-label"
+          for="block-all-cbox" i18n>Block item for all requests</label>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-success"
+      (click)="save()" i18n>Block item</button>
+    <button type="button" class="btn btn-normal"
+      (click)="close()" i18n>Cancel</button>
+  </div>
+</ng-template>

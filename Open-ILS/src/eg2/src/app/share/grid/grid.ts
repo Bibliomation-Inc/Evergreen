@@ -141,6 +141,7 @@ export class GridColumnSet {
     isSortable: boolean;
     isFilterable: boolean;
     isMultiSortable: boolean;
+    defaultDatePlusTime = false;
     stockVisible: string[];
     idl: IdlService;
     defaultHiddenFields: string[];
@@ -375,6 +376,9 @@ export class GridColumnSet {
             }
         }
 
+        if (col.datePlusTime !== false && col.datePlusTime !== true) {
+            col.datePlusTime = this.defaultDatePlusTime;
+        }
         if (!col.name) { col.name = col.path; }
         if (!col.align) { col.align = ''; }
         if (!col.label) { col.label = col.name; }
@@ -524,10 +528,19 @@ export class GridColumnSet {
             // fields to show or hide by default
 
             if (this.defaultVisibleFields) {
-                this.columns.forEach(col => {
-                    if (this.defaultVisibleFields.includes(col.name)) {
-                        col.visible = true;
-                    } else {
+
+                let newCols = [];
+
+                // First, we shove the defaultVisibleFields (aka "showFields") to the front of the list, in the requested order
+                this.defaultVisibleFields.forEach((dvf, dvfAt) => {
+                    const foundAt = this.columns.findIndex(c => c.name === dvf);
+                    const [extracted] = this.columns.splice(foundAt,1);
+                    extracted.visible = true;
+                    this.columns.splice(dvfAt, 0, extracted);
+                });
+
+                this.columns.forEach((col, ind) => {
+                    if (ind >= this.defaultVisibleFields.length) {
                         col.visible = false;
                     }
                 });
@@ -724,6 +737,7 @@ export class GridContext {
     grid_density: string;
     gridDomId: string;
     resizeWrapper: boolean;
+    defaultDatePlusTime: boolean;
 
     // Allow calling code to know when the select-all-rows-in-page
     // action has occurred.
@@ -766,6 +780,7 @@ export class GridContext {
         this.columnSet.isMultiSortable = this.isMultiSortable === true;
         this.columnSet.defaultHiddenFields = this.defaultHiddenFields;
         this.columnSet.defaultVisibleFields = this.defaultVisibleFields;
+        this.columnSet.defaultDatePlusTime = this.defaultDatePlusTime;
         if (!this.pager.limit) {
             this.pager.limit = this.disablePaging ? MAX_ALL_ROW_COUNT : 10;
         }
@@ -1101,20 +1116,16 @@ export class GridContext {
             const str = this.cellTextGenerator[col.name](row);
             return (str === null || str === undefined)  ? '' : str;
         } else {
-            if (col.cellTemplate) {
-                return ''; // avoid 'undefined' values
-            } else {
-                const str = this.getRowColumnValue(row, col);
-                switch (col.name) {
-                    case 'name':
-                    case 'url':
-                    case 'email':
-                        // TODO: insert <wbr> around punctuation
-                        break;
-                    default: break;
-                }
-                return str;
+            const str = this.getRowColumnValue(row, col) || '';
+            switch (col.name) {
+                case 'name':
+                case 'url':
+                case 'email':
+                    // TODO: insert <wbr> around punctuation
+                    break;
+                default: break;
             }
+            return str;
         }
     }
 

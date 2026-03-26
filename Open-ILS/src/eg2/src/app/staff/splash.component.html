@@ -1,13 +1,13 @@
-<h1 class="visually-hidden" tabindex="0" i18n>Evergreen Staff Client Home Page</h1>
+<h1 class="visually-hidden" tabindex="0" i18n>Fulfillment Staff Client Home Page</h1>
 
-<eg-title i18n-prefix prefix="Evergreen Staff Client"></eg-title>
+<eg-title i18n-prefix prefix="Fulfillment Staff Client"></eg-title>
 
 <div class="container">
 
   <!-- header icon -->
   <div class="row mb-3">
     <div class="col-lg-12 text-center">
-      <img src="/images/evergreen-logo.svg" role="img" class="eg-logo" alt="Evergreen" id="staff-banner" tabindex="0"/>
+      <img class="eg-logo" src="/images/portal/logo.png" id="staff-banner" tabindex="0" alt="Fulfillment"/>
     </div>
   </div>
 
@@ -21,7 +21,7 @@
           <div class="list-group">
             <ng-container *ngFor="let entry of portalEntries[i]">
               <div class="list-group-item border-0 p-2" *ngIf="entry.entry_type() === 'menuitem'">
-                <a href="{{entry.target_url()}}" [target]="entry.url_newtab() ? '_blank' : null" i18n>
+                <a href="{{entry.target_url()}}" target="{{entry.url_newtab() ? '_blank' : null}}" i18n>
                   <img src="{{entry.image_url()}}" alt="" role="presentation"/>
                   {{entry.label()}}
                 </a>
@@ -44,7 +44,7 @@
                 </div>
               </div>
               <div class="list-group-item border-0 p-2" *ngIf="entry.entry_type() === 'link'">
-                <a [target]="entry.url_newtab() ? '_blank' : '_top'" href="{{entry.target_url()}}" i18n>
+                <a target="{{entry.url_newtab() ? '_blank' : '_top'}}" href="{{entry.target_url()}}" i18n>
                   <img src="{{entry.image_url()}}" alt="" role="presentation"/>
                   {{entry.label()}}
                 </a>

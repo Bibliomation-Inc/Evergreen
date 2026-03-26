@@ -92,7 +92,7 @@ CREATE TRIGGER no_overlapping_deps
     BEFORE INSERT OR UPDATE ON config.db_patch_dependencies
     FOR EACH ROW EXECUTE PROCEDURE evergreen.array_overlap_check ('deprecates');
 
-INSERT INTO config.upgrade_log (version, applied_to) VALUES ('1502', :eg_version); -- miker/gmcharlt
+INSERT INTO config.upgrade_log (version, applied_to) VALUES ('1506', :eg_version); -- miker/gmcharlt
 INSERT INTO config.upgrade_log (version, applied_to) VALUES ('3.16.0', :eg_version);
 
 CREATE TABLE config.bib_source (
@@ -1521,6 +1521,22 @@ CREATE TABLE config.kpac_topics (
     content_link    TEXT, -- url
     content_search  TEXT, -- preset search string
     topic_order     INTEGER
+);
+
+CREATE TABLE config.lai_holding_map (
+    id                  SERIAL,
+    name                TEXT NOT NULL,
+    holding_tag         TEXT NOT NULL CHECK( LENGTH(holding_tag) = 3 ),
+    copy_location       TEXT,
+    call_number_prefix  TEXT,
+    call_number         TEXT,
+    call_number_suffix  TEXT,
+    barcode             TEXT,
+    copy_lib            TEXT,
+    alt_cn_tag          TEXT,
+    alt_cn_prefix       TEXT,
+    alt_cn_label        TEXT,
+    alt_cn_suffix       TEXT
 );
 
 COMMIT;

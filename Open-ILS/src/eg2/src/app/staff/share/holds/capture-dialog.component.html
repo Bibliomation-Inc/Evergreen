@@ -1,0 +1,39 @@
+<eg-string #successMsg
+    text="Successfully Captured ILL" i18n-text></eg-string>
+<eg-string #errorMsg
+    text="Failed To Capture ILL" i18n-text></eg-string>
+
+<ng-template #dialogContent>
+    <div class="modal-header">
+      <h4 class="modal-title">
+        <span i18n>Capture ILL</span>
+      </h4>
+      <button type="button" class="btn-close btn-close-white"
+        i18n-aria-label aria-label="Close dialog" (click)="close()"></button>
+    </div>
+    <div class="modal-body">
+      <div class="row d-flex justify-content-center" i18n>
+          <h5>Capture {{copyIds.length}} ILLs?</h5>
+      </div>
+      <div class="row" *ngIf="numSucceeded > 0" role="status">
+        <div class="col-lg-12" i18n>
+          {{numSucceeded}} ILL(s) Successfully Captured
+        </div>
+      </div>
+      <div class="row" *ngIf="numFailed > 0" role="status">
+        <div class="col-lg-12">
+          <div class="alert alert-warning" i18n>
+            {{numFailed}} ILL(s) Failed to Capture.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <ng-container *ngIf="!chargeResponse">
+        <button type="button" class="btn btn-normal"
+          (click)="close()" i18n>Cancel</button>
+        <button type="button" class="btn btn-success"
+          (click)="captureBatch()" i18n>Capture</button>
+      </ng-container>
+    </div>
+  </ng-template>

@@ -7,6 +7,8 @@ use OpenILS::Utils::HoldTargeter;
 use OpenILS::Const qw/:const/;
 use OpenSRF::Utils::Logger qw(:logger);
 use OpenSRF::EX qw(:try);
+use OpenILS::Application::AppUtils;
+my $apputils = "OpenILS::Application::AppUtils";
 
 __PACKAGE__->register_method(
     method    => 'hold_targeter',
@@ -88,42 +90,53 @@ sub hold_targeter {
     for my $hold_id (@hold_ids) {
         $count++;
 
-        my $single = 
-            OpenILS::Utils::HoldTargeter::Single->new(parent => $targeter);
+        # XXX Use the old hold targeter for now.
 
-        # Don't let an explosion on a single hold stop processing
-        eval { $single->target($hold_id) };
-
-        if ($@) {
-            my $msg = "Targeter failed processing hold: $hold_id : $@";
-            $single->error(1);
-            $logger->error($msg);
-            $single->message($msg) unless $single->message;
-        }
-        else {
-            if (defined($args->{hold}) ||
-                ( defined( $single->{previous_copy_id} ) &&
-                  defined( $single->hold->current_copy ) &&
-                  $single->{previous_copy_id} == $single->hold->current_copy )) {
-
-                $logger->info("Targeter could not find a hold or previous copy is the current copy");
-            } else {
-                $hold_ses->request(
-                    "open-ils.circ.hold_reset_reason_entry.create",
-                    $single->editor()->authtoken,
-                    $hold_id,
-                    OILS_HOLD_TIMED_OUT,
-                    undef,
-                    $single->{previous_copy_id}
-                );
-            }
-        }
+        # my $single = 
+        #     OpenILS::Utils::HoldTargeter::Single->new(parent => $targeter);
+        # 
+        # # Don't let an explosion on a single hold stop processing
+        # eval { $single->target($hold_id) };
+        # 
+        # if ($@) {
+        #     my $msg = "Targeter failed processing hold: $hold_id : $@";
+        #     $single->error(1);
+        #     $logger->error($msg);
+        #     $single->message($msg) unless $single->message;
+        # }
+        # else {
+        #     if (defined($args->{hold}) ||
+        #         ( defined( $single->{previous_copy_id} ) &&
+        #           defined( $single->hold->current_copy ) &&
+        #           $single->{previous_copy_id} == $single->hold->current_copy )) {
+        #
+        #         $logger->info("Targeter could not find a hold or previous copy is the current copy");
+        #     } else {
+        #         $hold_ses->request(
+        #             "open-ils.circ.hold_reset_reason_entry.create",
+        #             $single->editor()->authtoken,
+        #             $hold_id,
+        #             OILS_HOLD_TIMED_OUT,
+        #             undef,
+        #             $single->{previous_copy_id}
+        #         );
+        #     }
+        # }
+        my $result = $apputils->simplereq(
+            'open-ils.storage',
+            'open-ils.storage.action.hold_request.copy_targeter',
+            $args->{retarget_interval},
+            $hold_id
+        );
 
         if (($count % $throttle) == 0) { 
             # Time to reply to the caller.  Return either the number
             # processed thus far or the most recent summary object.
 
-            my $res = $args->{return_count} ? $count : $single->result;
+            # XXX modified for use with the old hold targeter
+            # my $res = $args->{return_count} ? $count : $single->result;
+
+            my $res = $args->{return_count} ? $count : $$result[0];
             $client->respond($res);
 
             $logger->info("targeted $count of $total holds");

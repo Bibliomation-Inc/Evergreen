@@ -43,7 +43,7 @@ export interface CircGridEntry extends CircDisplayInfo {
 
 const CIRC_FLESH_DEPTH = 4;
 const CIRC_FLESH_FIELDS = {
-    circ: ['target_copy', 'workstation', 'checkin_workstation', 'circ_lib'],
+    circ: ['target_copy', 'workstation', 'checkin_workstation', 'circ_lib', 'usr'],
     acp:  [
         'call_number',
         'holds_count',
@@ -55,6 +55,7 @@ const CIRC_FLESH_FIELDS = {
         'parts'
     ],
     acpm: ['part'],
+    au: ['card'],
     acn:  ['record', 'owning_lib', 'prefix', 'suffix'],
     bre:  ['wide_display_entry']
 };
@@ -65,6 +66,11 @@ const CIRC_FLESH_FIELDS = {
 })
 export class CircGridComponent implements OnInit {
 
+    // link to singlescan in ILL mode
+    @Input() illMode = false;
+    @Input() ill_role: string = null;
+
+    @Input() showFields: string;
     @Input() persistKey: string;
     @Input() printTemplate: string; // defaults to items_out
     @Input() menuStyle: 'full' | 'slim' | 'none' = 'full';
@@ -73,6 +79,15 @@ export class CircGridComponent implements OnInit {
 
     // Override default grid page size
     @Input() pageSize: number = null;
+    @Input() defaultDatePlusTime: boolean;
+
+    // Additional action menu options, added at the top of the menu or group
+    // [{ label: string, method: function(any[]), group: string }, ...]
+    @Input() customActions: any[];
+
+    // Additional toolbar buttons, added at the end of the toolbar
+    // [{ label: string, method: function(any[]) }, ...]
+    @Input() customButtons: any[];
 
     // Emitted when a grid action modified data in a way that could
     // affect which cirulcations should appear in the grid.  Caller

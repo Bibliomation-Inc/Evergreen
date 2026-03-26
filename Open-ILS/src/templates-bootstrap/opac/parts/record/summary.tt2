@@ -348,11 +348,11 @@ ctx.metalinks.push('
                 %]
                 <li class="list-group-item">
                     <a class="list-group-item-action" href="[% mkurl(ctx.opac_root _ '/place_hold',
-                    {hold_target => ctx.bre_id, hold_type => 'T', hold_source_page => mkurl()}, stop_parms) %]"
+                    {hold_target => ctx.mmr_id, hold_type => 'M', hold_source_page => mkurl()}, stop_parms) %]"
                     aria-describedby="rdetail_title">
                         <span class="place_hold">
                             <i class="fas fa-check" aria-hidden="true"></i>
-                            [% l('Place Hold') %]
+                            [% l('Place ILL Request') %]
                         </span>
                     </a>
                 </li>
@@ -372,7 +372,7 @@ ctx.metalinks.push('
                     {title => args.ebook.ebook_id, vendor => args.ebook.vendor, action => 'place_hold'}, stop_parms) %]"
                             rel="nofollow" vocab="" aria-describedby="rdetail_title">
                             <span class="place_hold"><i class="fas fa-check" aria-hidden="true"></i>
-                                [% l('Place Hold on E-Item') %]</span></a>
+                                [% l('Place ILL Request on E-Item') %]</span></a>
                     </li>
                 [%- END -%]
                     [% operation = ctx.mylist.grep('^' _ ctx.bre_id _ '$').size ? "delete" : "add";

@@ -1,0 +1,51 @@
+
+
+<ul ngbNav #holdsNav="ngbNav" class="nav-tabs" [activeId]="ill_role" [keyboard]="false" (navChange)="beforeTabChange($event)">
+
+  <li ngbNavItem="borrower">
+    <a ngbNavLink (click)="navItemClick('borrower', $event)" i18n>For My Patrons</a>
+    <ng-template ngbNavContent>
+      <eg-holds-grid pageSize="25"
+        persistKey="ff.ill.onshelf.borrower"
+        [illMode]="true"
+        [noLoadProgress]="true"
+        [hideHoldsCount]="false"
+        [enablePreFetch]="true"
+        [hideILLActions]="true"
+        [hidePickupLibFilter]="true"
+        [hidePullListLibFilter]="true"
+        [copyCircLib]="{not:contextOrg}"
+        [customActions]="customActions.borrower"
+        [currentShelfLib]="contextOrg"
+        [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
+        showFields="id,current_item,title,shelf_time,ucard_barcode,shelf_expire_time"
+      />
+    </ng-template>
+  </li>
+
+  <li ngbNavItem="lender">
+    <a ngbNavLink (click)="navItemClick('lender', $event)" i18n>At Other Libraries</a>
+    <ng-template ngbNavContent>
+      <eg-holds-grid pageSize="25"
+        persistKey="ff.ill.onshelf.lender"
+        [illMode]="true"
+        [noLoadProgress]="true"
+        [hideHoldsCount]="false"
+        [hidePrintPullList]="true"
+        [enablePreFetch]="true"
+        [hideILLActions]="true"
+        [hidePickupLibFilter]="true"
+        [hidePullListLibFilter]="true"
+        [copyCircLib]="contextOrg"
+        [customActions]="customActions.lender"
+        [currentShelfLib]="{not:contextOrg}"
+        [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
+        showFields="id,csl_shortname,current_item,title,shelf_time,ucard_barcode,shelf_expire_time"
+      />
+    </ng-template>
+  </li>
+</ul>
+
+<ng-container>
+  <div [ngbNavOutlet]="holdsNav"></div>
+</ng-container>

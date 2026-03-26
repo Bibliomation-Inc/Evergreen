@@ -10,7 +10,7 @@
   
 [% INCLUDE 'kpac/parts/breadcrumb.tt2' %]
 
-<h1>[% l('Place Hold') %]</h1>
+<h1>[% l('Place ILL Request') %]</h1>
 <p>[% l('Ask for this item and pick it up at your local library!') %]</p>
 <div class="row request_wrapper">
     <div class="col-12 col-lg-2 text-center text-lg-left request_cover_wrapper">

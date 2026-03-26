@@ -1,6 +1,20 @@
     [% IF !sso_enabled || sso_native %]
     <div class="row">
         <div class="col-sm-6">
+        <div style="float: left; padding-bottom: 10px; margin-right: 40px;">
+            <label for='home_ou_field' class="lbl1 form-label d-inline" >[% l('Please choose your home library') %]</label>
+            <div class="input_bg">
+                [%- org_select_id = 'home_ou_field'; -%]
+                [% PROCESS "opac/parts/org_selector.tt2";
+                   INCLUDE build_org_selector name='home_ou' default_text='Select your Library'
+                    id=org_select_id can_have_users_only=1 can_have_vols_only=1 %]
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+        <div style="float: left; clear:both;">
             <label for='username_field' class="lbl1 form-label d-inline" >[% l('Library Card Number') %]</label>
             <input class="form-control" type='text' id="username_field" name="username" 
                 autocomplete="username" autocapitalize="off" aria-describedby="login-failed-message username_hint"

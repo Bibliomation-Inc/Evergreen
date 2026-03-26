@@ -9,7 +9,7 @@
 <div class="container-fluid">
     <a class="navbar-brand nav-link with-material-icon nav-link-home" 
     routerLinkActive="active" ariaCurrentWhenActive="page" [routerLink]="getHomeLink()" (click)="closeDropdowns"
-    aria-label="Home" i18n-aria-label="Home button aria label@@navbar-home-button-aria-label"
+    aria-label="Home" i18n-aria-label
     egAccessKey keyCtx="navbar" i18n-keySpec i18n-keyDesc
     keySpec="alt+h" keyDesc="Navigate Home">
     <span class="material-icons" aria-hidden="true" title="Home: Alt+H">home</span>
@@ -18,7 +18,7 @@
   <button class="navbar-toggler text-light" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">&#9776;</button>
 
   <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse">
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.search">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Search
@@ -62,7 +62,7 @@
 
     <!-- CIRCULATION -->
 
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.circulation">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle class="nav-link dropdown-toggle">
           <span i18n>Circulation</span>
@@ -256,7 +256,7 @@
 
     <!-- CIRCULATION (EXPERIMENTAL) -->
 
-    <div class="navbar-nav" *ngIf="showAngularCirc">
+    <div class="navbar-nav" *ngIf="menuAccess.circulation && showAngularCirc">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n 
           class="nav-link dropdown-toggle">
@@ -379,7 +379,7 @@
 
     <!-- CATALOGING -->
     
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.cataloging">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Cataloging
@@ -534,8 +534,7 @@
     </div>
 
     <!-- ACQUISITIONS -->
-
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.acquisitions">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Acquisitions
@@ -677,7 +676,7 @@
       </div>
     </div>
 
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.booking">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Booking
@@ -741,7 +740,7 @@
       </div>
     </div>
 
-    <div class="navbar-nav">
+    <div class="navbar-nav" *ngIf="menuAccess.administration">
       <div ngbDropdown class="nav-item dropdown">
         <button type="button" ngbDropdownToggle i18n class="nav-link dropdown-toggle">
           Administration
@@ -791,6 +790,7 @@
             <span class="material-icons" aria-hidden="true">landscape</span>
             <span i18n>Local Administration</span>
           </a>
+          <!-- Hide in FF for now
           <a class="dropdown-item" ngbDropdownItem routerLinkActive="active" 
           ariaCurrentWhenActive="page" routerLink="/staff/admin/acq/splash"
             (click)="isMenuCollapsed = true" 
@@ -815,6 +815,7 @@
             <span class="material-icons" aria-hidden="true">business_center</span>
             <span i18n>Booking Administration</span>
           </a>
+          -->
           <a class="dropdown-item" ngbDropdownItem routerLinkActive="active"
           ariaCurrentWhenActive="page" routerLink="/staff/reporter/full"
             (click)="isMenuCollapsed = true"
@@ -860,19 +861,20 @@
         </div>
       </div>
     </div>
+
     <div class="navbar-nav" [ngClass]="{'ms-auto': !user()}">
       <div ngbDropdown class="nav-item dropdown color-mode-toggle" display="dynamic">
         <button type="button" ngbDropdownToggle class="nav-link dropdown-toggle with-material-icon">
           <ng-container *ngIf="colorMode === 'light'">
-            <span class="material-icons" aria-hidden="true">light_mode</span>
+            <span class="material-icons" title="Current color mode: Light" i18n-title aria-hidden="true">light_mode</span>
             <span class="visually-hidden" i18n>Current color mode: Light</span>
           </ng-container>
           <ng-container *ngIf="colorMode === 'dark'">
-            <span class="material-icons" aria-hidden="true">nightlight</span>
+            <span class="material-icons" title="Current color mode: Dark" i18n-title aria-hidden="true">nightlight</span>
             <span class="visually-hidden" i18n>Current color mode: Dark</span>
           </ng-container>
           <ng-container *ngIf="!colorMode || colorMode === 'auto'">
-            <span class="material-icons" aria-hidden="true">brightness_medium</span>
+            <span class="material-icons" title="Current color mode: Auto" i18n-title aria-hidden="true">brightness_medium</span>
             <span class="visually-hidden" i18n>Current color mode: Auto</span>
           </ng-container>
         </button>
@@ -895,13 +897,14 @@
         </div>
       </div>
     </div>
+
     <div class="navbar-nav" *ngIf="user()">
       <div ngbDropdown class="dropdown-menu" 
         class="nav-item" display="dynamic">
         <!-- Desktop button: list icon, no caret, no words -->
         <button ngbDropdownToggle *ngIf="isMenuCollapsed" type="button"
-          i18n-title title="Log out and more..."
-          i18n-aria-label aria-label="Log out and more..."
+          i18n-title title="Show user options"
+          i18n-aria-label aria-label="Show user options"
           class="nav-link dropdown-toggle no-caret with-material-icon">
           <span class="d-none d-lg-inline material-icons" aria-hidden="true">list</span>
         </button>

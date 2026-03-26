@@ -6,7 +6,7 @@ import {Component, TemplateRef, OnInit, Input, ViewEncapsulation} from '@angular
     <eg-title i18n-prefix [prefix]="bannerText"></eg-title>
 
     <div class="staff-banner" [ngClass]="bannerStyle">
-      <h1 id="staff-banner" tabindex="0" *ngIf="bannerText || bannerIcon">
+      <h1 id="staff-banner" tabindex="-1" *ngIf="bannerText || bannerIcon">
         <i class="material-icons align-middle text-start" aria-hidden="true" *ngIf="bannerIcon">{{bannerIcon}}</i>
         <span i18n>{{bannerText}}</span>
       </h1>

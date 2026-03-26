@@ -11,14 +11,11 @@ import {GridDataSource, GridCellTextGenerator} from '@eg/share/grid/grid';
 import {GridComponent} from '@eg/share/grid/grid.component';
 import {ProgressDialogComponent} from '@eg/share/dialog/progress.component';
 import {ConfirmDialogComponent} from '@eg/share/dialog/confirm.component';
-import {MarkDamagedDialogComponent
-} from '@eg/staff/share/holdings/mark-damaged-dialog.component';
-import {MarkMissingDialogComponent
-} from '@eg/staff/share/holdings/mark-missing-dialog.component';
-import {MarkDiscardDialogComponent
-} from '@eg/staff/share/holdings/mark-discard-dialog.component';
-import {HoldRetargetDialogComponent
-} from '@eg/staff/share/holds/retarget-dialog.component';
+import {MarkDamagedDialogComponent} from '@eg/staff/share/holdings/mark-damaged-dialog.component';
+import {MarkMissingDialogComponent} from '@eg/staff/share/holdings/mark-missing-dialog.component';
+import {MarkDiscardDialogComponent} from '@eg/staff/share/holdings/mark-discard-dialog.component';
+import {HoldRetargetDialogComponent} from '@eg/staff/share/holds/retarget-dialog.component';
+import {HoldCaptureDialogComponent} from '@eg/staff/share/holds/capture-dialog.component';
 import {HoldTransferDialogComponent} from './transfer-dialog.component';
 import {HoldCancelDialogComponent} from './cancel-dialog.component';
 import {HoldManageDialogComponent} from './manage-dialog.component';
@@ -27,6 +24,7 @@ import {HoldingsService} from '@eg/staff/share/holdings/holdings.service';
 import {OrgSelectComponent} from '@eg/share/org-select/org-select.component';
 import {ComboboxEntry} from '@eg/share/combobox/combobox.component';
 import {HoldCopyLocationsDialogComponent} from './copy-locations-dialog.component';
+import deepEqual from 'deep-equal';
 
 /** Holds grid with access to detail page and other actions */
 
@@ -37,15 +35,28 @@ import {HoldCopyLocationsDialogComponent} from './copy-locations-dialog.componen
 })
 export class HoldsGridComponent implements OnInit {
 
+    @Input() pageSize: number = null;
+    @Input() defaultDatePlusTime: boolean;
+
+    // link to singlescan in ILL mode
+    @Input() illMode = false;
+    @Input() ill_role: string = null;
+
     // Hide the "Holds Count" header
     @Input() hideHoldsCount = false;
+
+    @Input() hideILLActions = false;
 
     // If either are set/true, the pickup lib selector will display
     @Input() initialPickupLib: number | IdlObject;
     @Input() hidePickupLibFilter: boolean;
 
-    // Setting a value here puts us into "pull list" mode.
+    // Setting a value here puts us into "pull list" mode ...
     @Input() pullListOrg: number;
+    // but setting this to true disables that.
+    @Input() hidePullListLibFilter: boolean;
+
+    @Input() hidePrintPullList = false;
 
     // If true, only retrieve holds with a Hopeless Date
     // and enable related Actions
@@ -86,6 +97,19 @@ export class HoldsGridComponent implements OnInit {
     // displaying holds for a specific patron vs. e.g. a specific title.
     @Input() patronFocused = false;
 
+    @Input() currentShelfLib: any;
+    @Input() copyCircLib: any;
+
+    @Input() showCaptureAction = false;
+
+    // Additional action menu options, added at the top of the menu or group
+    // [{ label: string, method: function(any[]), group: string }, ...]
+    @Input() customActions: any[];
+
+    // Additional toolbar buttons, added at the end of the toolbar
+    // [{ label: string, method: function(any[]) }, ...]
+    @Input() customButtons: any[];
+
     mode: 'list' | 'detail' | 'manage' = 'list';
     initDone = false;
     holdsCount: number;
@@ -111,6 +135,8 @@ export class HoldsGridComponent implements OnInit {
     private markMissingDialog: MarkMissingDialogComponent;
     @ViewChild('markDiscardDialog')
     private markDiscardDialog: MarkDiscardDialogComponent;
+    @ViewChild('captureDialog', { static: true })
+    private captureDialog: HoldCaptureDialogComponent;
     @ViewChild('retargetDialog', { static: true })
     private retargetDialog: HoldRetargetDialogComponent;
     @ViewChild('cancelDialog', { static: true })
@@ -130,6 +156,7 @@ export class HoldsGridComponent implements OnInit {
     @Input() set recordId(id: number) {
         this._recordId = id;
         if (this.initDone) { // reload on update
+            this._prev_rows = [];
             this.holdsGrid.reload();
         }
     }
@@ -142,6 +169,7 @@ export class HoldsGridComponent implements OnInit {
     @Input() set patronId(id: number) {
         this._patronId = id;
         if (this.initDone) {
+            this._prev_rows = [];
             this.holdsGrid.reload();
         }
     }
@@ -152,12 +180,16 @@ export class HoldsGridComponent implements OnInit {
     // If true, show recently canceled holds only.
     @Input() showRecentlyCanceled = false;
 
+    // If true, do NOT show captured holds
+    @Input() excludeCaptured = false;
+
     // Include holds fulfilled on or after hte provided date.
     // If no value is passed, fulfilled holds are not displayed.
     _showFulfilledSince: Date;
     @Input() set showFulfilledSince(show: Date) {
         this._showFulfilledSince = show;
         if (this.initDone) { // reload on update
+            this._prev_rows = [];
             this.holdsGrid.reload();
         }
     }
@@ -173,6 +205,7 @@ export class HoldsGridComponent implements OnInit {
     @Input() set showHopelessAfter(show: Date) {
         this._showHopelessAfter = show;
         if (this.initDone) { // reload on update
+            this._prev_rows = [];
             this.holdsGrid.reload();
         }
     }
@@ -182,12 +215,18 @@ export class HoldsGridComponent implements OnInit {
     @Input() set showHopelessBefore(show: Date) {
         this._showHopelessBefore = show;
         if (this.initDone) { // reload on update
+            this._prev_rows = [];
             this.holdsGrid.reload();
         }
     }
 
     // Notify the caller the place hold button was clicked.
     @Output() placeHoldRequested: EventEmitter<void> = new EventEmitter<void>();
+
+    _prev_rows = [];
+    _prev_pager = {};
+    _prev_filters = {};
+    _prev_options = {};
 
     constructor(
         private ngLocation: Location,
@@ -199,19 +238,23 @@ export class HoldsGridComponent implements OnInit {
         private holdings: HoldingsService
     ) {
         this.gridDataSource = new GridDataSource();
-        this.enablePreFetch = null;
     }
 
     ngOnInit() {
         this.initDone = true;
         this.pickupLib = this.org.get(this.initialPickupLib);
+        this.hidePullListLibFilter ||= this.pullListOrg ? false : true;
+
+        if (this.pullListOrg && this.hidePullListLibFilter) {
+            this.plCompLoaded = true;
+        }
 
         if (this.preFetchSetting) {
             this.store.getItem(this.preFetchSetting).then(
                 applied => this.enablePreFetch = Boolean(applied)
             );
         } else {
-            this.enablePreFetch = false;
+            this.enablePreFetch = this.enablePreFetch ? true : false;
         }
 
         if (!this.defaultSort) {
@@ -296,6 +339,12 @@ export class HoldsGridComponent implements OnInit {
         }
     }
 
+    customMethodCallback(method, rows) {
+        method(rows);
+        this._prev_rows = [];
+        this.holdsGrid.reload();
+    }
+
     // Returns true after all data/settings/etc required to render the
     // grid have been fetched.
     initComplete(): boolean {
@@ -304,11 +353,13 @@ export class HoldsGridComponent implements OnInit {
 
     pickupLibChanged(org: IdlObject) {
         this.pickupLib = org;
+        this._prev_rows = [];
         this.holdsGrid.reload();
     }
 
     pullPickupLibLoaded(): void {
         this.plCompLoaded = true;
+        this._prev_rows = [];
         this.holdsGrid.reload();
     }
 
@@ -322,6 +373,7 @@ export class HoldsGridComponent implements OnInit {
         if (org?.id() !== this.pickupLib?.id()) {
             this.pickupLib = org;
             this.savePullFilterSettings();
+            this._prev_rows = [];
             this.holdsGrid.reload();
         }
     }
@@ -334,6 +386,7 @@ export class HoldsGridComponent implements OnInit {
                 this.copyLocationEntries = entries;
                 this.copyLocationIds = ids;
                 this.savePullFilterSettings();
+                this._prev_rows = [];
                 this.holdsGrid.reload();
             }
         );
@@ -347,6 +400,7 @@ export class HoldsGridComponent implements OnInit {
                 this.copyLocationEntries = [];
                 this.copyLocationIds = [];
                 this.savePullFilterSettings();
+                this._prev_rows = [];
                 this.holdsGrid.reload();
             }
         });
@@ -368,6 +422,7 @@ export class HoldsGridComponent implements OnInit {
     pullListOrgChanged(org: IdlObject): void {
         if (org && +org.id() !== +this.pullListOrg) {
             this.pullListOrg = org.id();
+            this._prev_rows = [];
             this.holdsGrid.reload();
         }
     }
@@ -376,6 +431,7 @@ export class HoldsGridComponent implements OnInit {
         this.enablePreFetch = apply;
 
         if (apply) {
+            this._prev_rows = [];
             setTimeout(() => this.holdsGrid.reload());
         }
 
@@ -388,6 +444,18 @@ export class HoldsGridComponent implements OnInit {
     applyFilters(): any {
 
         const filters: any = {};
+
+        if (this.copyLocationIds.length) {
+            filters['acpl.id'] = this.copyLocationIds;
+        }
+
+        if (this.copyCircLib) {
+            filters['cp.circ_lib'] = this.copyCircLib;
+        }
+
+        if (this.currentShelfLib) {
+            filters['h.current_shelf_lib'] = this.currentShelfLib;
+        }
 
         if (this.copyLocationIds.length) {
             filters['acpl.id'] = this.copyLocationIds;
@@ -458,12 +526,12 @@ export class HoldsGridComponent implements OnInit {
 
     fetchHolds(pager: Pager, sort: any[]): Observable<any> {
 
-        // We need at least one filter.
-        if (!this.recordId && !this.pickupLib && !this.patronId && !this.pullListOrg) {
-            return of([]);
-        }
-
         const filters = this.applyFilters();
+
+        // We need at least one filter. fulfillment_time comes for free, so length > 1
+        if (Object.keys(filters).length <= 1) {
+            return new Observable(observer => observer.complete());
+        }
 
         const orderBy: any = [];
         if (sort.length > 0) {
@@ -483,6 +551,31 @@ export class HoldsGridComponent implements OnInit {
             filters.cancel_time = null;
         }
 
+        if (this.excludeCaptured) {
+            filters.capture_time = null;
+        }
+
+        let pfStart = Number(pager.offset);
+        let pfEnd = pfStart + pager.limit;
+
+        if (this.enablePreFetch) {
+            console.debug('prefetch mode start, end:',pfStart,pfEnd);
+            if (this._prev_rows.length > 0
+                && deepEqual(this._prev_filters, filters)
+                && deepEqual(this._prev_options, options)
+            ) {
+                return new Observable(observer => {
+                    this._prev_rows.slice(pfStart, pfEnd).forEach((r) => observer.next(r));
+                    observer.complete();
+                });
+            } else {
+                this._prev_rows = [];
+                this._prev_pager = {...pager};
+                this._prev_filters = {...filters};
+                this._prev_options = {...options};
+            }
+        }
+
         let observer: Observer<any>;
         const observable = new Observable(obs => observer = obs);
 
@@ -494,7 +587,8 @@ export class HoldsGridComponent implements OnInit {
         this.progressDialog.update({value: 0, max: 1});
 
         let first = true;
-        let loadCount = 0;
+        let loadCount = this.holdsCount = 0;
+        let currentIndex = 0;
         this.net.request(
             'open-ils.circ',
             'open-ils.circ.hold.wide_hash.stream',
@@ -503,6 +597,7 @@ export class HoldsGridComponent implements OnInit {
             { next: holdData => {
 
                 if (first) { // First response is the hold count.
+                    console.debug('hold.wide_hash.stream hold count: ', holdData);
                     this.holdsCount = Number(holdData);
                     first = false;
 
@@ -511,7 +606,15 @@ export class HoldsGridComponent implements OnInit {
                     this.progressDialog.update(
                         {value: ++loadCount, max: this.holdsCount});
 
-                    observer.next(holdData);
+                    if (this.enablePreFetch) {
+                        this._prev_rows.push({...holdData});
+                        if (currentIndex >= pfStart && currentIndex <= pfEnd) {
+                            observer.next(holdData);
+                        }
+                        currentIndex++;
+                    } else {
+                        observer.next(holdData);
+                    }
                 }
             }, error: (err: unknown) => {
                 this.progressDialog.close();
@@ -576,6 +679,7 @@ export class HoldsGridComponent implements OnInit {
         this.mode = 'list';
 
         if (rowsModified) {
+            this._prev_rows = [];
             // give the grid a chance to render then ask it to reload
             setTimeout(() => this.holdsGrid.reload());
         }
@@ -637,6 +741,7 @@ export class HoldsGridComponent implements OnInit {
             this.manageDialog.open({size: 'lg'}).subscribe(
                 rowsModified => {
                     if (rowsModified) {
+                        this._prev_rows = [];
                         this.holdsGrid.reload();
                     }
                 }
@@ -651,6 +756,7 @@ export class HoldsGridComponent implements OnInit {
             this.transferDialog.open({}).subscribe(
                 rowsModified => {
                     if (rowsModified) {
+                        this._prev_rows = [];
                         this.holdsGrid.reload();
                     }
                 }
@@ -680,6 +786,7 @@ export class HoldsGridComponent implements OnInit {
 
         await markNext(copyIds);
         if (rowsModified) {
+            this._prev_rows = [];
             this.holdsGrid.reload();
         }
     }
@@ -691,6 +798,7 @@ export class HoldsGridComponent implements OnInit {
             this.markMissingDialog.open({}).subscribe(
                 rowsModified => {
                     if (rowsModified) {
+                        this._prev_rows = [];
                         this.holdsGrid.reload();
                     }
                 }
@@ -705,6 +813,7 @@ export class HoldsGridComponent implements OnInit {
             this.markDiscardDialog.open({}).subscribe(
                 rowsModified => {
                     if (rowsModified) {
+                        this._prev_rows = [];
                         this.holdsGrid.reload();
                     }
                 }
@@ -713,6 +822,21 @@ export class HoldsGridComponent implements OnInit {
     }
 
 
+    showCaptureDialog(rows: any[]) {
+        const copyIds = rows.map(r => r.cp_id).filter(id => Boolean(id));
+        if (copyIds.length > 0) {
+            this.captureDialog.copyIds = copyIds;
+            this.captureDialog.open({}).subscribe(
+                rowsModified => {
+                    if (rowsModified) {
+                        this._prev_rows = [];
+                        this.holdsGrid.reload();
+                    }
+                }
+            );
+        }
+    }
+
     showRetargetDialog(rows: any[]) {
         const holdIds = rows.map(r => r.id).filter(id => Boolean(id));
         if (holdIds.length > 0) {
@@ -720,6 +844,7 @@ export class HoldsGridComponent implements OnInit {
             this.retargetDialog.open({}).subscribe(
                 rowsModified => {
                     if (rowsModified) {
+                        this._prev_rows = [];
                         this.holdsGrid.reload();
                     }
                 }
@@ -734,6 +859,7 @@ export class HoldsGridComponent implements OnInit {
             this.cancelDialog.open({}).subscribe(
                 rowsModified => {
                     if (rowsModified) {
+                        this._prev_rows = [];
                         this.holdsGrid.reload();
                     }
                 }
@@ -764,6 +890,7 @@ export class HoldsGridComponent implements OnInit {
                     }
                 }, complete: () => {
                     this.progressDialog.close();
+                    this._prev_rows = [];
                     this.holdsGrid.reload();
                 } }
             );

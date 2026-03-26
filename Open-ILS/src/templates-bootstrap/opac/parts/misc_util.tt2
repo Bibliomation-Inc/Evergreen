@@ -705,6 +705,13 @@
                         barcode => copy.getAttribute('barcode'),
                         owner => volume.getAttribute('lib')
                     };
+                    duplicate = 'FALSE';
+                    FOR copy IN args.holdings;
+                        IF copy.circ_lib == holding.circ_lib AND copy.barcode == holding.barcode;
+                            duplicate = 'TRUE';
+                        END;
+                    END;
+                    NEXT IF duplicate == 'TRUE';
                     args.holdings.push(holding);
                     part_label = '';
                 END;
@@ -840,15 +847,18 @@
     # magically upgrades any use of 'loc' to 'locg',
     # which is a superset of 'loc'.
     BLOCK get_library;
+        loc_value_is_default = 0;
         loc_name = 'locg';
 
         # Location groups don't have shortnames, so they'll take priority
         # (_org doesn't contain the group and breaks the selector).
         loc_value = ctx.copy_location_group ? CGI.param(loc_name)
                   : ctx.copy_location_group_org # resolved locg
-                    || CGI.param(loc_name) || CGI.param('loc') || ctx.search_ou;
-        # This value should be numeric, but users could input anything.
-        # So let's remove any non-numbers to avoid potential reflected XSS vulnerabilities.
+                    || CGI.param(loc_name) || CGI.param('loc');
+        IF !loc_value;
+            loc_value_is_default = 1;
+            loc_value = ctx.search_ou;
+        END;
         loc_value = loc_value.replace('[^0-9:]', '');
     END;
 
@@ -942,6 +952,13 @@
 [% END -%]
 [% END -%]
 
+[%-
+# Displays a cover image with a link to the bib record. Parameters are
+#
+# * row_isbnissn (ISBN/ISSN; needed only if using Obalkyknih)
+# * row_rec_id (bib ID of the title; mandatory)
+#
+-%]
 [%- BLOCK show_cover -%]
     <td role="cell">
     [% IF obalkyknih_cz.enabled == 'true' %]
@@ -950,7 +967,7 @@
         END %]
         <a href='http://obalkyknih.cz/view?isbn=[% row_isbnissn %]'>
     [% ELSE %]
-        <a href='[% ctx.media_prefix %]/opac/extras/ac/jacket/medium/r/[% row_rec_id | uri %]'>
+    <a href="[% mkurl(ctx.opac_root _ '/record/' _ row_rec_id, {}, 1) %]">
     [% END %]
     <img alt="" class='my-2' style="max-width:70px;"
             src='[% ctx.media_prefix %]/opac/extras/ac/jacket/medium/r/[% row_rec_id | uri %]'/>

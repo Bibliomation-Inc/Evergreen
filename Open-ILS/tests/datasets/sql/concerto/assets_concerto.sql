@@ -99,13 +99,13 @@ INSERT INTO biblio.monograph_part (record, label) VALUES
     (53, 'DISC 1'), (53, 'DISC 2'), (53, 'DISC 3'), (53, 'DISC 4');
 
 -- Create additional copies for the parts
-INSERT INTO asset.copy (call_number, circ_lib, creator, editor, loan_duration, fine_level, barcode)
-    SELECT id, owning_lib, 1, 1, 1, 1, 'CONC70001' || id::text
+INSERT INTO asset.copy (call_number, source_lib, circ_lib, creator, editor, loan_duration, fine_level, barcode)
+    SELECT id, owning_lib, owning_lib, 1, 1, 1, 1, 'CONC70001' || id::text
     FROM asset.call_number
     WHERE record IN (53, 84) AND label LIKE 'M%' AND owning_lib = 7;
 
-INSERT INTO asset.copy (call_number, circ_lib, creator, editor, loan_duration, fine_level, barcode)
-    SELECT id, owning_lib, 1, 1, 1, 1, 'CONC70002' || id::text
+INSERT INTO asset.copy (call_number, source_lib, circ_lib, creator, editor, loan_duration, fine_level, barcode)
+    SELECT id, owning_lib, owning_lib, 1, 1, 1, 1, 'CONC70002' || id::text
     FROM asset.call_number
     WHERE record IN (53, 84) AND label LIKE '78%' AND owning_lib = 7;
 
@@ -125,8 +125,8 @@ INSERT INTO biblio.peer_type (name)
     VALUES ('Media player');
 
 -- Create additional copies for the conjoined items
-INSERT INTO asset.copy (call_number, circ_lib, creator, editor, loan_duration, fine_level, barcode)
-    SELECT id, owning_lib, 1, 1, 1, 1, 'PEERBIB' || record::text
+INSERT INTO asset.copy (call_number, source_lib, circ_lib, creator, editor, loan_duration, fine_level, barcode)
+    SELECT id, owning_lib, owning_lib, 1, 1, 1, 1, 'PEERBIB' || record::text
     FROM asset.call_number
     WHERE record = 15 AND label LIKE 'M%' AND owning_lib = 4;
 

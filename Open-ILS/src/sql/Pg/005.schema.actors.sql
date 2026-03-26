@@ -160,7 +160,7 @@ CREATE TRIGGER actor_crypt_pw_insert_trigger
 	BEFORE INSERT ON actor.usr FOR EACH ROW
 	EXECUTE PROCEDURE actor.crypt_pw_insert ();
 
-CREATE RULE protect_user_delete AS ON DELETE TO actor.usr DO INSTEAD UPDATE actor.usr SET deleted = TRUE WHERE OLD.id = actor.usr.id RETURNING *;
+SELECT evergreen.setup_delete_protect_rule('actor','usr');
 
 CREATE OR REPLACE FUNCTION actor.user_ingest_name_keywords() 
     RETURNS TRIGGER AS $func$
@@ -389,7 +389,7 @@ CREATE TRIGGER actor_stat_cat_sip_update_trigger
 CREATE TABLE actor.card (
 	id	SERIAL	PRIMARY KEY,
 	usr	INT	NOT NULL REFERENCES actor.usr (id) DEFERRABLE INITIALLY DEFERRED,
-	barcode	TEXT	NOT NULL UNIQUE,
+	barcode	TEXT	NOT NULL,
 	active	BOOL	NOT NULL DEFAULT TRUE
 );
 COMMENT ON TABLE actor.card IS $$
@@ -427,6 +427,7 @@ CREATE TABLE actor.org_unit (
 	name		TEXT	NOT NULL UNIQUE,
 	email		TEXT,
 	phone		TEXT,
+	routing_code	TEXT,
 	opac_visible	BOOL	NOT NULL DEFAULT TRUE,
     staff_catalog_visible BOOL NOT NULL DEFAULT TRUE,
 	fiscal_calendar INT     NOT NULL DEFAULT 1   -- foreign key constraint to be added later
@@ -477,6 +478,12 @@ $$ LANGUAGE PLPGSQL;
 CREATE TRIGGER actor_org_unit_parent_protect_trigger
     BEFORE INSERT OR UPDATE ON actor.org_unit FOR EACH ROW
     EXECUTE PROCEDURE actor.org_unit_parent_protect ();
+
+ALTER TABLE actor.card
+    ADD COLUMN org INT NOT NULL DEFAULT 1
+        REFERENCES actor.org_unit (id) DEFERRABLE INITIALLY DEFERRED;
+
+CREATE UNIQUE INDEX actor_card_barcode_org_idx ON actor.card (barcode, org);
 
 CREATE TABLE actor.org_lasso (
     id            SERIAL  PRIMARY KEY,
@@ -934,7 +941,7 @@ ALTER TABLE actor.usr_standing_penalty ALTER COLUMN id SET DEFAULT nextval('acto
 ALTER TABLE actor.usr_standing_penalty ADD COLUMN usr_message BIGINT REFERENCES actor.usr_message(id);
 CREATE INDEX usr_standing_penalty_usr_message_idx ON actor.usr_standing_penalty (usr_message);
 
-CREATE RULE protect_usr_message_delete AS ON DELETE TO actor.usr_message DO INSTEAD UPDATE actor.usr_message SET deleted = TRUE WHERE OLD.id = actor.usr_message.id RETURNING *;
+SELECT evergreen.setup_delete_protect_rule('actor','usr_message');
 
 -- limited view to ensure that a library user who somehow
 -- manages to figure out how to access pcrud cannot change
@@ -1609,5 +1616,16 @@ CREATE TABLE actor.patron_loader_log (
 ALTER TABLE actor.patron_loader_log ADD CONSTRAINT actor_patron_loader_log_org_fkey FOREIGN KEY (org_unit) REFERENCES actor.org_unit (id) DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE config.patron_loader_header_map ADD CONSTRAINT config_patron_loader_header_map_org_fkey FOREIGN KEY (org_unit) REFERENCES actor.org_unit (id) DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE config.patron_loader_value_map ADD CONSTRAINT config_patron_loader_value_map_org_fkey FOREIGN KEY (org_unit) REFERENCES actor.org_unit (id) DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TABLE actor.web_action_print_template (
+    id          SERIAL      PRIMARY KEY,
+    owner       INT         NOT NULL REFERENCES actor.usr (id)
+                            ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
+    focus       TEXT        NOT NULL CHECK (focus IN ('circ','hold','transit','copy')),
+    action      TEXT        CHECK (action IN ('Check In','Recall','Receive',
+                            'Check Out','Capture','Reject','Freeze','Thaw','Cancel')),
+    direction   TEXT        CHECK (direction IN ('Incoming','Outgoing')),
+    template    TEXT        NOT NULL
+);
 
 COMMIT;

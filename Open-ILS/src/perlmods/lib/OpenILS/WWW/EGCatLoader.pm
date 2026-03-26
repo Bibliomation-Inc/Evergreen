@@ -409,7 +409,10 @@ sub load_common {
     $ctx->{home_page} = $ctx->{proto} . '://' . $ctx->{hostname} . $self->ctx->{opac_root} . "/home";
     $ctx->{logout_page} = ($ctx->{proto} eq 'http' ? 'https' : $ctx->{proto} ) . '://' . $ctx->{hostname} . $self->ctx->{opac_root} . "/logout";
 
-    if($e->authtoken($self->cgi->cookie(COOKIE_SES))) {
+    my $token = $self->cgi->cookie(COOKIE_SES) || $self->cgi->cookie(COOKIE_STAFF_TOKEN);
+    $token =~ s/"//g if ($token);
+
+    if($e->authtoken($token)) {
 
         if($e->checkauth) {
 
@@ -810,7 +813,8 @@ sub load_login {
     my $username = $cgi->param('username') || '';
     $username =~ s/\s//g;  # Remove blanks
     my $password = $cgi->param('password');
-    my $org_unit = $ctx->{physical_loc} || $ctx->{aou_tree}->()->id;
+    my $org_unit = $cgi->param('home_ou') ||
+        $ctx->{physical_loc} || $ctx->{aou_tree}->()->id;
     my $persist = $cgi->param('persist');
     my $client_tz = $cgi->param('client_tz');
 
@@ -862,7 +866,8 @@ sub load_login {
         my $args = {
             type => ($persist) ? 'persist' : 'opac',
             org => $org_unit,
-            agent => 'opac'
+            agent => 'opac',
+            password => $password
         };
 
         my $bc_regex = $ctx->{get_org_setting}->($org_unit, 'opac.barcode_regex');
@@ -877,21 +882,30 @@ sub load_login {
         }
 
         if (!$auth_proxy_enabled) {
+
+            $logger->info("FF TPAC login for $username @ $org_unit");
             my $seed = $U->simplereq(
-                'open-ils.auth',
-                'open-ils.auth.authenticate.init', $username);
-            $args->{password} = md5_hex($seed . md5_hex($password));
+                'open-ils.actor',
+                'open-ils.actor.remote.authenticate.init',
+                $username, $org_unit);
+
+            $args->{password} = $seed == -1 ? 
+                $password :   md5_hex($seed . md5_hex($password));
+
+            $args->{home} = $org_unit;
+            # FF always uses the username field
+            $args->{username} = $args->{barcode} if $args->{barcode};
+
             $response = $U->simplereq(
-                'open-ils.auth', 'open-ils.auth.authenticate.complete', $args);
+                'open-ils.actor',
+                'open-ils.actor.remote.authenticate.complete', $args);
+
         } else {
             $args->{password} = $password;
             $response = $U->simplereq(
                 'open-ils.auth_proxy',
                 'open-ils.auth_proxy.login', $args);
         }
-        $self->timelog("Checked password");
-    } else {
-        $response ||= OpenILS::Event->new( 'LOGIN_FAILED' ); # assume failure
     }
 
     if($U->event_code($response)) { 

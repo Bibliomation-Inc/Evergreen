@@ -147,7 +147,9 @@ export class DialogComponent implements OnInit {
     }
 
     private _restoreFocus() {
-        setTimeout(() => this.returnFocusTo.focus());
+        if (this.returnFocusTo) {
+            setTimeout(() => this.returnFocusTo.focus());
+        }
     }
 
     public getFocusable() {

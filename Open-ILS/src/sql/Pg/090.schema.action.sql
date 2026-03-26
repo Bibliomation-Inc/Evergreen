@@ -2245,5 +2245,48 @@ $func$ LANGUAGE PLPGSQL;
 CREATE TRIGGER aaa_indexing_ingest_or_delete AFTER INSERT OR UPDATE ON biblio.record_entry FOR EACH ROW EXECUTE PROCEDURE evergreen.indexing_ingest_or_delete ();
 CREATE TRIGGER aaa_auth_ingest_or_delete AFTER INSERT OR UPDATE ON authority.record_entry FOR EACH ROW EXECUTE PROCEDURE evergreen.indexing_ingest_or_delete ();
 
+CREATE OR REPLACE FUNCTION action.hold_request_mediated () RETURNS TRIGGER AS $f$
+BEGIN
+    SELECT COALESCE( (
+        SELECT actor.org_unit_ancestor_setting(
+            'ff.request.force_mediation',
+            NEW.request_lib)).value::BOOL, NEW.frozen)
+        INTO NEW.frozen;
+    RETURN NEW;
+END;
+$f$ LANGUAGE PLPGSQL;
+
+CREATE TRIGGER ahr_mediation_tgr BEFORE INSERT ON action.hold_request
+    FOR EACH ROW EXECUTE PROCEDURE action.hold_request_mediated ();
+
+CREATE TABLE action.copy_block_hold (
+    id serial primary key,
+    item bigint NOT NULL,
+    hold bigint REFERENCES action.hold_request(id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
+    staff bigint NOT NULL REFERENCES actor.usr(id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
+    block_time timestamp with time zone DEFAULT now() NOT NULL,
+    reason text NOT NULL
+);
+
+CREATE OR REPLACE FUNCTION evergreen.action_copy_block_hold_item_inh_fkey()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ COST 50
+AS $function$
+BEGIN
+    PERFORM 1 FROM asset.copy WHERE id = NEW.item;
+    IF NOT FOUND THEN
+        RAISE foreign_key_violation USING MESSAGE = FORMAT(
+            $$Referenced asset.copy id not found, item:%s$$, NEW.item
+        );
+    END IF;
+    RETURN NEW;
+END;
+$function$;
+
+CREATE CONSTRAINT TRIGGER inherit_copy_block_hold_item_fkey
+    AFTER INSERT OR UPDATE ON action.copy_block_hold DEFERRABLE INITIALLY IMMEDIATE
+    FOR EACH ROW EXECUTE PROCEDURE evergreen.action_copy_block_hold_item_inh_fkey();
+
 COMMIT;
 

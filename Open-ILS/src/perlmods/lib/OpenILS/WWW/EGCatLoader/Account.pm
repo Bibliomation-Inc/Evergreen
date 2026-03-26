@@ -1552,7 +1552,7 @@ sub load_place_hold {
     };
     $ctx->{user_setting_map} = $user_setting_map;
 
-    my $default_notify = (defined $$user_setting_map{'opac.hold_notify'} ? $$user_setting_map{'opac.hold_notify'} : 'email:phone');
+    my $default_notify = (defined $$user_setting_map{'opac.hold_notify'} ? $$user_setting_map{'opac.hold_notify'} : '');
     if ($default_notify =~ /email/) {
         $ctx->{default_email_notify} = 'checked';
     } else {
@@ -1623,7 +1623,8 @@ sub load_place_hold {
             for my $id (@targets) {
                 my ($mr) = grep {$_->id eq $id} @$mrecs;
 
-                my $ou_id = $cgi->param('pickup_lib') || $self->ctx->{search_ou};
+                # my $ou_id = $cgi->param('pickup_lib') || $self->ctx->{search_ou};
+                my $ou_id = 1; # XXX FulfILLment wants to look everywhere
                 my $filter_data = $U->simplereq(
                     'open-ils.circ',
                     'open-ils.circ.mmr.holds.filters.authoritative', $mr->id, $ou_id);
@@ -1787,16 +1788,20 @@ sub load_place_hold {
         $logger->info("Staff initiated hold");
         if (!$cgi->param("hold_usr_is_requestor")) {
             # find the real hold target
-
-            $usr = $U->simplereq(
+            my $user = $U->simplereq(
                 'open-ils.actor',
-                "open-ils.actor.user.retrieve_id_by_barcode_or_username",
-                $e->authtoken, $cgi->param("hold_usr"));
+                'open-ils.actor.remote.proxy_user.find_or_create',
+                $e->authtoken, $cgi->param("hold_usr")
+            );
 
-            if (defined $U->event_code($usr)) {
+            if($U->event_code($user)) {
+                # user check failed, report the reason to the template
                 $ctx->{hold_failed} = 1;
-                $ctx->{hold_failed_event} = $usr;
+                $ctx->{hold_failed_event} = $user;
+                return Apache2::Const::OK;
             }
+
+            $usr = $user->id;
         }
 
         if ($ctx->{hold_subscription}) {
@@ -1804,6 +1809,7 @@ sub load_place_hold {
             $logger->info("Hold Group Event requested for user bucket: " . $ctx->{hold_subscription});
             $usr = $e->retrieve_container_user_bucket($ctx->{hold_subscription});
         }
+
     }
 
     # target_id is the true target_id for holds placement.
